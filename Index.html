@@ -1,0 +1,1210 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Standara Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working app. Header with role switch, tab bar, main column + the Record trail beside it (stacks on phones). */
+:root{
+  --bg:#F4F6F5; --surface:#FFFFFF; --sunk:#EBF0EE; --line:#D6DEDB; --ink:#13262B; --muted:#56686A;
+  --teal:#1D6B5F; --teal-soft:#DCEBE7; --amber:#B97A12; --amber-soft:#FBEFD8;
+  --good:#24774A; --good-soft:#DDF0E4; --bad:#B03A35; --bad-soft:#F8E1DF; --info:#2F5D8A; --info-soft:#E1EAF4;
+  --b1:#C7D1CE; --b2:#E2B45C; --b3:#93C7BA; --b4:#2E8C79; --b5:#17594E;
+  --f-display:"Newsreader", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E181B; --surface:#152328; --sunk:#1B2C31; --line:#2A3E43; --ink:#E4ECEA; --muted:#9AAEAA;
+  --teal:#5DBBA9; --teal-soft:#183A35; --amber:#E9B65A; --amber-soft:#3A2E17;
+  --good:#6CC793; --good-soft:#173726; --bad:#EE8A84; --bad-soft:#3F1F1D; --info:#8DB6E2; --info-soft:#1C2E42; --b1:#3B4E53; --b2:#B98B38; --b3:#4F8E81; --b4:#5DBBA9; --b5:#9BE3D2; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E181B; --surface:#152328; --sunk:#1B2C31; --line:#2A3E43; --ink:#E4ECEA; --muted:#9AAEAA;
+  --teal:#5DBBA9; --teal-soft:#183A35; --amber:#E9B65A; --amber-soft:#3A2E17;
+  --good:#6CC793; --good-soft:#173726; --bad:#EE8A84; --bad-soft:#3F1F1D; --info:#8DB6E2; --info-soft:#1C2E42; --b1:#3B4E53; --b2:#B98B38; --b3:#4F8E81; --b4:#5DBBA9; --b5:#9BE3D2; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:12px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand b{font-family:var(--f-display);font-size:26px;font-weight:600;letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.roles{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;flex-wrap:wrap}
+.roles button{border:0;background:transparent;color:var(--muted);font:500 13px var(--f-body);padding:7px 12px;border-radius:7px;cursor:pointer}
+.roles button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.rolelabel{font-size:12px;color:var(--muted)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;padding-block:0}
+nav.tabs a{padding:10px 14px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--teal)}
+nav.tabs a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;padding-block:24px 48px}
+@media (max-width:960px){main{grid-template-columns:minmax(0,1fr)}}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.005em}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.1}
+h2{font-size:24px;line-height:1.2}
+h3{font-size:18px}
+p{margin:0}
+.lede{color:var(--muted);max-width:65ch}
+.stack{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel.flat{background:transparent;border:0;padding:0}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ref{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);background:var(--sunk);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.spread{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 16px}
+.btn{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:var(--surface)}
+.btn.warn{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.p-release,.p-green{background:var(--good-soft);color:var(--good)}
+.p-hold,.p-red{background:var(--bad-soft);color:var(--bad)}
+.p-review,.p-amber{background:var(--amber-soft);color:var(--amber)}
+.p-info{background:var(--info-soft);color:var(--info)}
+.p-muted{background:var(--sunk);color:var(--muted)}
+.stack > .pill{align-self:flex-start;white-space:normal}
+.promise{background:var(--sunk);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.promise blockquote{margin:0;font-family:var(--f-display);font-size:17px;line-height:1.35}
+.guide{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--ink);color:var(--bg);padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));padding-top:12px;box-shadow:0 -4px 18px rgba(0,0,0,.18)}
+.guide .gin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 20px;align-items:center}
+@media (max-width:700px){.guide .gin{grid-template-columns:minmax(0,1fr)}}
+.guide .gk{font-size:11px;letter-spacing:.09em;text-transform:uppercase;opacity:.75;font-weight:600}
+.guide h3{font-size:19px;color:var(--bg)}
+.guide p{font-size:14px;opacity:.9;max-width:75ch}
+.guide .gbtns{display:flex;flex-wrap:wrap;gap:8px}
+.guide .btn{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
+.guide .btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.gdots{display:flex;gap:4px;margin-top:6px}.gdots i{width:18px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--bg) 30%,transparent)}.gdots i.on{background:var(--teal)}
+body.guiding{padding-bottom:190px}
+body.guiding .toast{bottom:auto;top:calc(90px + env(safe-area-inset-top,0px))}
+.guide-target{outline:3px solid var(--amber)!important;outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){.guide-target{animation:gp 1.4s ease-in-out infinite}@keyframes gp{50%{outline-color:transparent}}}
+#funding-access,#fund-types,#lender-pack,#lender-monitor{scroll-margin-top:150px}
+.fv{border-top:1px solid var(--line);padding-top:8px}.fv summary{cursor:pointer;font-weight:600;padding:4px 0}.fvb{padding:8px 0 4px}
+#lender-full{scroll-margin-top:150px}
+.scorecard{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.scorecard{grid-template-columns:minmax(0,1fr)}}
+.sc-dial{display:flex;flex-direction:column;align-items:center;gap:8px}
+.bandscale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.bandscale div{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted);padding:6px;border-radius:6px}
+.bandscale div.on{background:var(--sunk);color:var(--ink);font-weight:600}
+.bandscale i{display:block;height:6px;border-radius:3px}
+.bandscale em{font-style:normal;font-variant-numeric:tabular-nums;font-size:11px}
+.factors{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.factors li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:8px}
+main a:not(.btn):not(.panel){color:var(--teal)}
+.journeys{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.journeys .panel ol{margin:0;padding-left:20px;font-size:13.5px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+/* Assurance scale: three steps, filled bars */
+.as{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;white-space:nowrap}
+.as i{display:inline-flex;gap:2px}
+.as i b{width:7px;height:14px;border-radius:2px;border:1.5px solid var(--teal);display:block}
+.as i b.on{background:var(--teal)}
+.as.none i b{border-color:var(--line)}
+.as em{font-style:normal;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}
+.commit{display:grid;grid-template-columns:6px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.commit:last-child{border-bottom:0}
+.stripe{border-radius:3px}
+.s-green{background:var(--good)} .s-amber{background:var(--amber)} .s-red{background:var(--bad)}
+.commit h4{margin:0;font-size:15px;font-weight:600}
+.meta{font-size:13px;color:var(--muted)}
+.cause{font-size:13.5px;margin-top:4px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.step .n{font-family:var(--f-display);font-size:28px;color:var(--teal);line-height:1}
+.step p{font-size:13.5px;color:var(--muted)}
+.try li{margin-bottom:6px}
+.trail{position:sticky;top:120px;align-self:start;max-height:calc(100vh - 140px);overflow:auto}
+@media (max-width:960px){.trail{position:static;max-height:none}}
+.trail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.trail li{font-size:13px;border-left:2px solid var(--line);padding-left:10px}
+.trail li.new{border-left-color:var(--teal)}
+.trail time{font-family:var(--f-mono);font-size:11px;color:var(--muted);display:block}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--sunk)}
+.bar span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.score{font-family:var(--f-display);font-size:44px;line-height:1;font-weight:600}
+pre.json{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border-radius:8px;padding:12px;overflow:auto;max-height:340px;margin:0;color:var(--ink)}
+.inline-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;padding:10px;background:var(--sunk);border-radius:8px}
+select,input[type=text]{font:14px var(--f-body);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.checks li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px}
+.tick{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--surface)}
+.tick.done{background:var(--good);border-color:var(--good)}
+.phase{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;padding:4px 9px;border-radius:6px;background:var(--sunk)}
+.chip code{display:none}
+.ref:not(.keep){display:none}
+.disclaimer{font-size:12.5px;color:var(--muted);padding-block:8px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.note{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.roleban{font-size:13.5px;padding:10px 14px;border-radius:10px;background:var(--teal-soft);color:var(--ink)}
+@media (prefers-reduced-motion:no-preference){.trail li.new{animation:fl .8s ease}@keyframes fl{from{background:var(--teal-soft)}to{background:transparent}}}
+</style>
+
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand"><b>Standara</b><span>Interactive demo · illustrative data</span></div>
+    <span class="rolelabel" id="rolelabel">Viewing as</span>
+    <div class="roles" role="group" aria-labelledby="rolelabel">
+      <button data-role="buyer" aria-pressed="true">Buyer · council</button>
+      <button data-role="supplier" aria-pressed="false">Supplier</button>
+      <button data-role="lender" aria-pressed="false">Lender</button>
+    </div>
+    <button class="btn" id="reset">Reset demo</button>
+  </div>
+  <div class="wrap"><nav class="tabs" aria-label="Sections">
+    <a href="#how">How it works</a><a href="#why">Why Standara</a><a href="#contract">Contract</a><a href="#evidence">Delivery evidence</a><a href="#comply">Comply</a><a href="#pay">Payments</a><a href="#bank">Bank details</a><a href="#bureau">Bureau</a><a href="#score">Trust Score</a><a href="#finance">Finance</a><a href="#lender">Lender</a><a href="#record">Supplier record</a><a href="#infra">Infrastructure</a><a href="#phases">What’s built when</a>
+  </nav></div>
+</header>
+
+<div class="disclaimer"><div class="wrap">Illustrative data only. All organisations, people, contracts and figures are fictional; any resemblance to a real company is unintended. Nothing here is saved.</div></div>
+<div class="wrap"><main>
+  <div id="view" class="stack" aria-live="polite"></div>
+  <aside class="panel trail" aria-labelledby="trailh">
+    <div class="stack">
+      <div><p class="eyebrow">The Record</p><h3 id="trailh">Contract trail</h3>
+      <p class="note">Every action is time-stamped and kept. Nothing is deleted. <span class="ref">CL-03</span></p></div>
+      <ol id="trail"></ol>
+    </div>
+  </aside>
+</main></div>
+<div class="toast" id="toast" hidden></div>
+<div class="guide" id="guide" hidden></div>
+
+<script>
+const fmt = n => "£" + n.toLocaleString("en-GB", {maximumFractionDigits: 0});
+const TODAY = new Date("2026-11-06T14:00:00");
+const daysSince = d => Math.round((TODAY - new Date(d + "T09:00:00")) / 864e5);
+const PEOPLE = {buyer: "Dana Okafor, contract manager", supplier: "Demo Build Co.", partner: "Dana Okafor, contract manager", approver: "Priya Shah, finance director"};
+
+function initial() {
+  return {
+    role: "buyer",
+    commitments: [
+      {id:"C1", title:"Attend emergency repairs within 24 hours", period:"October", due:"2026-10-31", owner:"Demo Build: J. Morris · Council: D. Okafor", ev:"corroborated", by:"Repairs system log, confirmed by the council", ref:"F-C13"},
+      {id:"C2", title:"Return 40 void homes to lettable standard", period:"October", due:"2026-10-31", owner:"Demo Build: A. Begum · Council: D. Okafor", ev:"doc", by:"Completion photos and checklists uploaded in the app", ref:"F-C14"},
+      {id:"C3", title:"Two apprentices on site, five days a week", period:"Week 42", due:"2026-10-23", owner:"Demo Build: A. Begum · Council: L. Grant", ev:"partial", days:5, done:3, by:"Site check-ins for 3 of 5 days", ref:"WK-09"},
+      {id:"C4", title:"Gas safety certificate for every void home", period:"October", due:"2026-11-14", owner:"Demo Build: R. Patel · Council: D. Okafor", ev:"self", by:"Supplier says certificates are done; none attached", ref:"CA-02"},
+      {id:"C5", title:"Monthly performance report", period:"October", due:"2026-11-05", owner:"Demo Build: J. Morris · Council: D. Okafor", ev:"none", by:"Not received", ref:"CA-06"}
+    ],
+    invoices: [
+      {id:"INV-1041", desc:"Emergency repairs, October", amount:48200, received:"2026-10-20", links:["C1"]},
+      {id:"INV-1042", desc:"Void works, October (40 homes)", amount:96500, received:"2026-10-11", links:["C2"]},
+      {id:"INV-1043", desc:"Apprentice-supported labour, week 42 (5 days)", amount:9500, received:"2026-10-28", links:["C3"]},
+      {id:"INV-1044", desc:"Out-of-hours call-outs, 18 jobs at £95", amount:1710, received:"2026-10-30", links:["C1"], rate:95, contractRate:85}
+    ],
+    bank: {step:0, rejected:false},
+    shared: "open",
+    kpiDrafted: false,
+    evFilter: "all",
+    whySel: 0,
+    bureauSel: "build",
+    corr: {},
+    fin: {consent:false, req:{}},
+    lender: {offer:null, funded:false, declined:false},
+    comply: [
+      {id:"K1", name:"Public liability insurance, £10m", status:"valid", expires:"31 Mar 2027", source:"Insurer certificate, checked with the broker"},
+      {id:"K2", name:"Gas Safe registration", status:"expiring", expires:"20 Nov 2026", source:"Checked against the Gas Safe Register"},
+      {id:"K3", name:"Cyber Essentials", status:"expired", expires:"2 Oct 2026", source:"Checked against the certification body"},
+      {id:"K4", name:"Modern slavery statement", status:"valid", source:"Published statement, reviewed yearly"},
+      {id:"K5", name:"CSCS cards for site workers", status:"valid", source:"20 of 20 workers checked against the card scheme"},
+      {id:"K6", name:"Exclusion and sanctions lists", status:"clear", source:"Debarment list and UK sanctions list, checked daily"}
+    ],
+    trail: [
+      {t:"1 Apr 09:00", who:"Example Borough Council", what:"Contract signed. Five promises loaded from the tender answers and contract schedules.", ref:"CL-28"},
+      {t:"11 Oct 09:12", who:"Demo Build Co.", what:"Invoice INV-1042 received for void works.", ref:"F-030"},
+      {t:"20 Oct 08:40", who:"Repairs system", what:"Emergency repairs log matched to C1; confirmed by Dana Okafor.", ref:"CL-09"},
+      {t:"23 Oct 17:02", who:"Site check-in", what:"Apprentices checked in on 3 of 5 days in week 42.", ref:"WK-09"},
+      {t:"2 Nov 10:15", who:"Demo Build Co.", what:"Requested a change of bank details. Payments stay on the verified account.", ref:"CA-05"}
+    ]
+  };
+}
+let S = initial();
+
+// Assurance: 0 none, 1 self-reported, 2 document-backed, 3 independently corroborated (CL-37)
+function assurance(c) {
+  if (c.ev === "corroborated") return 3;
+  if (c.ev === "doc" || c.ev === "partial") return 2;
+  if (c.ev === "self") return 1;
+  return 0;
+}
+const AS_NAME = ["No evidence", "Assurance 1 · Self-reported", "Assurance 2 · Document-backed", "Assurance 3 · Independently corroborated"];
+function asHTML(level) {
+  const bars = [1,2,3].map(i => `<b class="${i <= level ? "on" : ""}"></b>`).join("");
+  return `<span class="as ${level ? "" : "none"}" title="${AS_NAME[level]}"><i aria-hidden="true">${bars}</i>${level ? AS_NAME[level] : "<em>No evidence</em>"}</span>`;
+}
+function rag(c) {
+  if (c.ev === "disputed") return "red";
+  if (c.ev === "corroborated") return "green";
+  if (c.ev === "none" && new Date(c.due) < TODAY) return "red";
+  return "amber";
+}
+const RAG_TXT = {green:"On track", amber:"Needs confirming", red:"Overdue or disputed"};
+const C = id => S.commitments.find(c => c.id === id);
+
+function invStatus(inv) {
+  if (inv.override) return {s:"Release", cause:`Released by override: ${inv.override}`};
+  if (inv.disputed) return {s:"Hold", cause:"Disputed. Dispute notice sent to the supplier on 6 Nov.", code:"disputed"};
+  for (const id of inv.links) {
+    const c = C(id);
+    if (c.ev === "partial") {
+      if (inv.partPaid) return {s:"Hold", cause:`Part released (${c.done} of ${c.days} days, ${fmt(inv.partPaid)}). Balance held for days not yet logged.`, code:"part"};
+      return {s:"Hold", cause:`Service logged ${c.done} of ${c.days} days.`, code:"days", partPay: true};
+    }
+    const a = assurance(c);
+    if (a < 3) {
+      const why = a === 2 ? "Completion photos supplied but not yet confirmed by the council (Assurance 2; this contract needs Assurance 3)."
+        : a === 1 ? "Supplier’s word only (Assurance 1; this contract needs Assurance 3)."
+        : "No delivery evidence yet.";
+      return {s:"Hold", cause: inv.requested ? why + " Evidence requested from the supplier." : why, code:"assurance"};
+    }
+  }
+  if (inv.rate && inv.rate > inv.contractRate) return {s:"Review", cause:`Rate above contract: £${inv.rate} a job against £${inv.contractRate}.`, code:"rate"};
+  return {s:"Release", cause:"Delivery independently corroborated and bank details verified."};
+}
+
+function log(who, what, ref) {
+  const t = new Date();
+  const stamp = "6 Nov " + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0");
+  S.trail.push({t: stamp, who, what, ref, fresh: true});
+}
+let toastT;
+function toast(msg) { const el = document.getElementById("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 3200); }
+
+const roleBanner = {
+  buyer: "You are the council’s contract manager. You set what proof is needed, confirm or dispute what the supplier says it delivered, and decide what gets paid.",
+  supplier: "You are Demo Build Co., the contractor. You show what you delivered. Standara is free for you.",
+  lender: "You are Demo Lender One, a partner lender. You see only what suppliers choose to share, and you alone decide whether to lend.",
+};
+
+/* ---------- Views ---------- */
+function vHow() {
+  return `
+  <section class="stack">
+    <p class="eyebrow">Responsive repairs and voids · Example Borough Council</p>
+    <h1>Public money goes out only when delivery is proven.</h1>
+    <p class="lede">Standara keeps one record for each public contract: what was promised, what evidence shows it was delivered, who confirmed it, and whether each invoice can be paid. This demo uses illustrative data: the council, the supplier, the people and every figure are invented.</p>
+  </section>
+  <section class="journeys" aria-label="Guided journeys">
+    <div class="panel stack"><p class="eyebrow">Guided journey</p><h3>As a supplier</h3>
+      <ol><li>Join free and get verified</li><li>See what you promised</li><li>Add evidence</li><li>Ask for independent confirmation</li><li>See why an invoice is held</li><li>Stay compliant</li><li>Build your Trust Score from delivery and financial standing</li><li>Use your score to reach lenders</li><li>See the types of funding available</li><li>Get offers</li><li>Accept and get paid</li></ol>
+      <div><button class="btn primary" data-act="journey" data-id="supplier">Start supplier journey</button></div></div>
+    <div class="panel stack"><p class="eyebrow">Guided journey</p><h3>As a buyer</h3>
+      <ol><li>Load the contract once</li><li>See all the proof in one place</li><li>Confirm or dispute delivery</li><li>Run the payment check</li><li>Stop bank-detail fraud</li><li>Chase what is expiring</li><li>Prepare the KPI notice</li><li>Check suppliers for the next contract</li></ol>
+      <div><button class="btn primary" data-act="journey" data-id="buyer">Start buyer journey</button></div></div>
+    <div class="panel stack"><p class="eyebrow">Guided journey</p><h3>As a lender partner</h3>
+      <ol><li>Set your own lending criteria</li><li>Get full view when a supplier asks for funding</li><li>Receive a funding request</li><li>See everything about the supplier</li><li>Check your criteria</li><li>Make an offer</li><li>Fund the supplier</li><li>Monitor with live alerts</li><li>Lend on credit infrastructure</li></ol>
+      <div><button class="btn primary" data-act="journey" data-id="lender">Start lender journey</button></div></div>
+  </section>
+  <div class="steps">
+    ${[
+      ["Award","The contract and its promises (commitments) are loaded once, with an owner on each side.","CL-28, CM-01"],
+      ["Evidence","The supplier adds proof: photos, timesheets, site check-ins, certificates.","F-C02, F-C14"],
+      ["Confirm","Someone independent, such as the council, confirms it. That is Assurance 3.","CL-09, CL-37"],
+      ["Check","Each invoice is matched to the evidence: Release, Hold or Review, with the reason.","PAY-01, F-030"],
+      ["Fix","Problems land in one exception queue: part-pay, ask for evidence or dispute.","PAY-09"],
+      ["Record","Verified delivery builds the supplier’s record and score, which lenders and buyers can trust.","CL-21, F-023"]
+    ].map((s,i)=>`<div class="step"><span class="n">${i+1}</span><h3>${s[0]}</h3><p>${s[1]}</p><span class="ref">${s[2]}</span></div>`).join("")}
+  </div>
+  <div class="panel row" style="justify-content:space-between"><div><b>Why use Standara?</b> <span class="note">Benefits and pilot targets for suppliers, councils, lenders and private buyers.</span></div><a class="btn" href="#why" style="text-decoration:none">See the benefits</a></div>
+  <section class="stack"><h2>The modules</h2>
+  <div class="grid2">${[
+    ["Comply","Checks delivery evidence and compliance through the whole contract.","#comply"],
+    ["Delivery evidence","Photos, check-ins, logs and certificates, each with its assurance level.","#evidence"],
+    ["Pay","Release, Hold or Review on every invoice, plus bank-detail fraud checks.","#pay"],
+    ["Contract Performance Bureau","Look up any supplier’s delivery record, like a credit bureau for public contracts.","#bureau"],
+    ["Trust Score","A score built from verified delivery, for buyers and lenders.","#score"],
+    ["Finance","Partner lenders fund suppliers on verified invoices. Standara never lends.","#finance"],
+    ["Profile","The supplier’s verified record, shared once with every buyer.","#record"]
+  ].map(m=>`<a class="panel stack" href="${m[2]}" style="text-decoration:none;color:inherit"><h3>${m[0]}</h3><p class="note">${m[1]}</p></a>`).join("")}</div></section>
+  <div class="panel stack">
+    <h2>Try it in four clicks</h2>
+    <ol class="try">
+      <li>Open <a href="#pay">Payments</a> as the buyer. INV-1042 for £96,500 is on Hold: photos only, nobody independent has confirmed the work.</li>
+      <li>Open <a href="#contract">Contract</a> and press <b>Confirm delivered</b> on the void works.</li>
+      <li>Go back to <a href="#pay">Payments</a>. INV-1042 is now Release, and the trail on the right shows who confirmed it and when.</li>
+      <li>Open <a href="#score">Trust Score</a> to see the Delivery part go up, and <a href="#finance">Finance</a> to see the invoice become eligible for funding.</li>
+    </ol>
+    <p class="note">Standara never holds or moves money. It tells the council’s own finance system what is safe to pay.</p>
+  </div>
+  <div class="panel stack">
+    <h2>The Standara Assurance Scale</h2>
+    <p class="lede">Every piece of delivery evidence shows how far you can rely on it.</p>
+    <div class="stack" style="gap:10px">${[1,2,3].map(l=>`<div class="row">${asHTML(l)}<span class="note">${["","The supplier says it was done. Nothing attached.","Backed by the supplier’s own documents or systems: photos, timesheets, certificates.","Confirmed by someone outside the supplier: the buyer, a delivery partner or an official register."][l]}</span></div>`).join("")}</div>
+  </div>`;
+}
+
+function commitActions(c) {
+  const r = S.role, out = [];
+  if (r === "supplier") {
+    if (c.ev === "none") out.push(`<button class="btn primary" data-act="ev-doc" data-id="${c.id}">Upload report</button>`);
+    if (c.ev === "self") out.push(`<button class="btn primary" data-act="ev-doc" data-id="${c.id}">Attach certificates</button>`);
+    if (c.ev === "disputed") out.push(`<button class="btn" data-act="ev-doc" data-id="${c.id}">Add more evidence</button>`);
+  }
+  if (r === "buyer") {
+    if (c.ev === "doc") out.push(`<button class="btn primary" data-act="confirm" data-id="${c.id}">Confirm delivered</button><button class="btn warn" data-act="dispute" data-id="${c.id}">Dispute</button>`);
+    if (c.ev === "partial") out.push(`<button class="btn primary" data-act="days" data-id="${c.id}">Confirm days 4 and 5 from site sign-in sheet</button>`);
+    if (c.ev === "self") out.push(`<span class="note">Nothing to confirm yet: the supplier has not attached certificates.</span>`);
+  }
+  if (r === "buyer") {
+    if (c.ev === "none" || c.ev === "self") out.push(`<button class="btn" data-act="request" data-id="${c.id}">Ask supplier for evidence</button>`);
+  }
+  return out.join("");
+}
+
+function vContract() {
+  const kpis = [
+    ["Emergency repairs attended within 24 hours", "98%", "99.1%", "Good", "p-green"],
+    ["Average days to re-let a void home", "20 days", "23 days", "Approaching target", "p-amber"],
+    ["Tenant satisfaction with repairs", "85%", "88%", "Good", "p-green"]
+  ];
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="panel stack">
+    <div class="spread"><div><p class="eyebrow">Verified Contract Record</p><h2>Responsive repairs and voids, Lot 2</h2></div><span class="ref keep">VCR-EBC-2026-0418</span></div>
+    <dl class="kv">
+      <dt>Buyer</dt><dd>Example Borough Council</dd>
+      <dt>Supplier</dt><dd>Demo Build Co.</dd>
+      <dt>Value and term</dt><dd>£6.2m over 3 years, from 1 April 2026</dd>
+      <dt>Proof needed</dt><dd>Assurance 3 before payment, set by the council <span class="ref">CL-37</span></dd>
+    </dl>
+  </section>
+  <section class="panel">
+    <div class="spread"><h2>Commitments</h2><span class="ref">CL-01 · CM-01</span></div>
+    <p class="note" style="margin-top:4px">What the supplier promised. Status is worked out from the evidence, so nobody can mark their own work green.</p>
+    <div>${S.commitments.map(c => {
+      const r = rag(c), a = assurance(c);
+      return `<div class="commit"><div class="stripe s-${r}" aria-hidden="true"></div><div class="stack" style="gap:6px">
+        <div class="spread"><h4>${c.title}</h4><span class="pill p-${r}"><span class="dot"></span>${RAG_TXT[r]}</span></div>
+        <div class="row">${asHTML(a)}<span class="meta">${c.period} · due ${new Date(c.due).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span><span class="ref">${c.ref}</span></div>
+        <p class="meta">${c.ev === "partial" ? `Site check-ins for ${c.done} of ${c.days} days` : c.by}</p>
+        ${promiseHTML(c, true)}
+        <p class="meta">Owners: ${c.owner}</p>
+        ${commitActions(c) ? `<div class="row">${commitActions(c)}</div>` : ""}
+      </div></div>`;}).join("")}</div>
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h2>Key performance indicators</h2><span class="ref keep">Procurement Act 2023</span></div>
+    <div class="scroll"><table><thead><tr><th>KPI</th><th>Target</th><th class="num">Actual</th><th>Rating</th></tr></thead>
+    <tbody>${kpis.map(k=>`<tr><td>${k[0]}</td><td>${k[1]}</td><td class="num">${k[2]}</td><td><span class="pill ${k[4]}">${k[3]}</span></td></tr>`).join("")}</tbody></table></div>
+    <div class="row"><span class="note">Next annual assessment due 31 March 2027.</span>
+    ${S.role === "buyer" ? `<button class="btn" data-act="kpi" ${S.kpiDrafted ? "disabled" : ""}>${S.kpiDrafted ? "Draft notice ready" : "Draft the performance notice"}</button>` : ""}</div>
+    ${S.kpiDrafted ? `<pre class="json">Contract performance notice (draft for the council to publish)
+Contract: VCR-EBC-2026-0418, Responsive repairs and voids, Lot 2
+Supplier: Demo Build Co.
+KPI 1  Emergency repairs within 24 hours   Good
+KPI 2  Days to re-let a void home           Approaching target
+KPI 3  Tenant satisfaction                  Good
+Evidence: 412 corroborated repair jobs, 38 void completions
+Status: draft. The council approves and publishes it.</pre>` : ""}
+  </section>`;
+}
+
+function exceptionRow(inv) {
+  const st = invStatus(inv), age = daysSince(inv.received), late = age >= 25;
+  let acts = "";
+  if (S.role === "buyer" && st.s !== "Release") {
+    if (st.partPay) acts += `<button class="btn primary" data-act="partpay" data-id="${inv.id}">Part-pay ${C(inv.links[0]).done} of ${C(inv.links[0]).days} days</button>`;
+    if (st.code === "assurance" && !inv.requested) acts += `<button class="btn" data-act="reqinv" data-id="${inv.id}">Ask for evidence</button>`;
+    if (!inv.disputed && st.code !== "part") acts += `<button class="btn warn" data-act="disputeinv" data-id="${inv.id}">Dispute</button>`;
+    acts += `<button class="btn" data-act="ovr" data-id="${inv.id}">Override</button>`;
+  }
+  const form = S.ovrOpen === inv.id ? `<div class="inline-form">
+      <label for="ovr-reason">Reason</label>
+      <select id="ovr-reason"><option>Agreed rate change by email, 29 Oct</option><option>Evidence checked off-platform</option><option>Urgent payment approved by director</option></select>
+      ${inv.amount > 25000 ? `<span class="note">Over £25,000: a second approver is needed.</span>` : ""}
+      <button class="btn primary" data-act="ovrgo" data-id="${inv.id}">${inv.amount > 25000 ? "Send to Priya Shah to approve" : "Override and release"}</button>
+      <button class="btn" data-act="ovrcancel">Cancel</button></div>` : "";
+  return `<tr>
+    <td><b>${inv.id}</b><div class="meta">${inv.desc}</div></td>
+    <td class="num">${fmt(inv.amount)}</td>
+    <td><span class="pill p-${st.s.toLowerCase()}">${st.s}</span><div class="cause">${st.cause}</div>${form}${acts ? `<div class="row" style="margin-top:8px">${acts}</div>` : ""}</td>
+    <td class="num"><span class="${late && st.s !== "Release" ? "pill p-hold" : ""}">Day ${age}</span>${late && st.s !== "Release" ? `<div class="meta">Pay or dispute by day 30</div>` : ""}</td>
+  </tr>`;
+}
+
+function vPay() {
+  const all = S.invoices.map(i => ({i, st: invStatus(i)}));
+  const ex = all.filter(x => x.st.s !== "Release").sort((a,b) => daysSince(b.i.received) - daysSince(a.i.received));
+  const held = ex.reduce((s,x) => s + x.i.amount - (x.i.partPaid || 0), 0);
+  const ok = all.filter(x => x.st.s === "Release");
+  const supplierView = S.role === "supplier";
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="grid2">
+    <div class="panel"><p class="eyebrow">Ready to pay</p><p class="score">${fmt(ok.reduce((s,x)=>s+x.i.amount,0) + all.reduce((s,x)=>s+(x.i.partPaid||0),0))}</p><p class="note">${ok.length} invoice${ok.length===1?"":"s"} cleared${all.some(x=>x.i.partPaid)?", plus part payments":""}</p></div>
+    <div class="panel"><p class="eyebrow">Held or in review</p><p class="score">${fmt(held)}</p><p class="note">${ex.length} exception${ex.length===1?"":"s"}, each with a reason the supplier can see</p></div>
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h2>${supplierView ? "Your invoices" : "Exception desk"}</h2><span class="ref">PAY-01 · PAY-09</span></div>
+    <p class="note">${supplierView ? "If an invoice is held, the reason tells you exactly what is missing." : "Every invoice that cannot be paid as it stands, oldest first. The council must pay valid invoices within 30 days."}</p>
+    <div class="scroll"><table><thead><tr><th>Invoice</th><th class="num">Amount</th><th>Status and reason</th><th class="num">Age</th></tr></thead>
+    <tbody>${(supplierView ? all : ex).map(x => exceptionRow(x.i)).join("") || `<tr><td colspan="4">No exceptions. Everything due can be paid.</td></tr>`}</tbody></table></div>
+  </section>
+  ${!supplierView ? `<section class="panel stack">
+    <div class="spread"><h2>Cleared for payment</h2><span class="ref keep">Order, receipt and invoice matched</span></div>
+    <div class="scroll"><table><tbody>${ok.map(x=>`<tr><td><b>${x.i.id}</b><div class="meta">${x.i.desc}</div></td><td class="num">${fmt(x.i.amount)}</td><td><span class="pill p-release">Release</span><div class="cause">${x.st.cause}</div></td></tr>`).join("") || `<tr><td>Nothing cleared yet.</td></tr>`}</tbody></table></div>
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h2>What the council’s finance system sees</h2><span class="pill p-info">Phase 2</span></div>
+    <p class="note">In the pilot this goes as a CSV file. From Phase 2, the finance system asks Standara directly before each payment run.</p>
+    <div><button class="btn" data-act="api">Run payment-run check</button></div>
+    ${S.apiShown ? `<pre class="json">${apiJSON()}</pre>` : ""}
+  </section>` : ""}`;
+}
+function apiJSON() {
+  return JSON.stringify({payment_run: "PR-2026-11-06", checked_at: "2026-11-06T14:00:00Z",
+    invoices: S.invoices.map(i => { const st = invStatus(i); return {invoice: i.id, status: st.s.toLowerCase(), reason: st.cause,
+      assurance: assurance(C(i.links[0])), bank_details: "verified", valid_until: "2026-11-07T14:00:00Z"}; })}, null, 2)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;");
+}
+
+function vBank() {
+  const b = S.bank, steps = [
+    ["Request made inside Standara, not by email", "Demo Build Co., 2 Nov"],
+    ["Account name checked with the new bank (Confirmation of Payee)", "Name match: DEMO BUILD CO"],
+    ["Call-back to the contact already on file", "Ring J. Morris on the number held since 2024"],
+    ["First approver", PEOPLE.buyer],
+    ["Second approver", PEOPLE.approver],
+    ["Cooling-off period ends", "2 working days, then the new account is used"]
+  ];
+  const canAct = S.role === "buyer";
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="panel stack">
+    <div class="spread"><div><p class="eyebrow">Change of bank details</p><h2>Demo Build Co.: new account ending 9031</h2></div><span class="ref">CA-05 · PAY-02</span></div>
+    <p class="note">Fake “we’ve changed banks” emails are one of the commonest frauds against councils. Until every check passes, payments keep going to the verified account ending 2210.</p>
+    ${b.rejected ? `<p class="pill p-hold">Change rejected. Payments stay on the account ending 2210.</p>` : ""}
+    <ul class="checks">${steps.map((s,i)=>{
+      const done = i < b.step + 1 && !b.rejected;
+      const next = i === b.step + 1 && !b.rejected;
+      let btn = "";
+      if (next && canAct) btn = i === 5 ? `<button class="btn primary" data-act="bank">Skip to end of cooling-off (demo)</button>` : `<button class="btn primary" data-act="bank">${["","Run check","Mark call-back done","Approve","Approve as Priya Shah",""][i]}</button>`;
+      return `<li><span class="tick ${done?"done":""}" aria-hidden="true">${done?"✓":""}</span><div><b>${s[0]}</b><div class="meta">${s[1]}</div></div><div>${btn}</div></li>`;}).join("")}</ul>
+    ${b.step >= 5 ? `<p class="pill p-release">New account verified. Used from the next payment run.</p>` : (canAct && !b.rejected ? `<div><button class="btn warn" data-act="bankreject">Reject change</button></div>` : (!canAct ? `<p class="note">Only the council can approve this. Switch to Buyer to try it.</p>` : ""))}
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h2>Shared bank account found</h2><span class="ref">PAY-02 · v12.5</span></div>
+    ${S.shared === "open" ? `<p>Two other suppliers on the council’s list, <b>Demo Scaffolding Co.</b> and <b>Demo Groundworks Co.</b>, are paid into the same account (ending 7742). They are not in one company group on Companies House.</p>
+      <p class="note">This can be innocent, such as a shared invoice-finance account, or a sign of fraud. Their invoices are set to Review until someone checks.</p>
+      ${canAct ? `<div class="row"><button class="btn" data-act="sharedok">Explained: invoice finance account, letter on file</button><button class="btn warn" data-act="sharedbad">Escalate to counter-fraud</button></div>` : ""}`
+      : `<p class="pill ${S.shared === "ok" ? "p-release" : "p-hold"}">${S.shared === "ok" ? "Checked and explained. Flag closed, reason recorded." : "Escalated to counter-fraud. Both suppliers’ invoices on Hold."}</p>`}
+  </section>`;
+}
+
+function vRecord() {
+  const lv = [0,0,0,0]; S.commitments.forEach(c => lv[assurance(c)]++);
+  const n = S.commitments.length, pct = x => Math.round(100 * x / n);
+  const cols = ["var(--line)", "var(--muted)", "var(--amber)", "var(--teal)"];
+  return `
+  <section class="panel stack">
+    <div class="spread"><div><p class="eyebrow">Delivery Record</p><h2>Demo Build Co.</h2></div><span class="ref keep">STD-DR-04417</span></div>
+    <p class="note">How the evidence on this contract was confirmed. Shares are shown, never averaged into one number. <span class="ref">CL-37</span></p>
+    <div class="bar" role="img" aria-label="Assurance shares">${[3,2,1,0].map(l => lv[l] ? `<span style="width:${pct(lv[l])}%;background:${cols[l]}"></span>` : "").join("")}</div>
+    <div class="legend">${[3,2,1,0].map(l => `<span><b style="background:${cols[l]}"></b>${l ? "Assurance " + l : "No evidence"}: ${lv[l]} of ${n} (${pct(lv[l])}%)</span>`).join("")}</div>
+  </section>
+  <p class="note">The supplier’s score is on the <a href="#score">Trust Score</a> tab.</p>
+  <section class="grid2">
+    <div class="panel stack">
+      <div class="spread"><h3>Can they carry this contract?</h3><span class="ref">FS-08</span></div>
+      <dl class="kv"><dt>Tier</dt><dd>Silver contract</dd><dt>Turnover</dt><dd>2.4 times the annual contract value</dd><dt>Public work</dt><dd>£9.1m across 3 councils</dd><dt>Watchlist</dt><dd>No distress events</dd></dl>
+    </div>
+    <div class="panel stack">
+      <div class="spread"><h3>Recommended contract value</h3><span class="ref">TD-02</span></div>
+      <p class="score" style="font-size:30px">£5m to £20m</p>
+      <p class="note">Based on verified delivery and financial standing. Company age is never used. A lower band says “start smaller”, never “no”.</p>
+    </div>
+  </section>`;
+}
+
+function vPhases() {
+  const P = [
+    ["Phase 1 · Prove the wedge", "Now to January 2027 · construction and housing pilots", [
+      ["CL-01","The Record: contracts and commitments"],["F-C14","Evidence capture, works offline"],["F-C13","Recipient confirmation"],["CL-37","Assurance Scale"],
+      ["CA-03","Service Receipt"],["PAY-01","Release, Hold or Review"],["PAY-09","Exception desk"],["PAY-02","Bank-detail checks"],["CA-05","Bank change control"],["CA-06","Procurement Act KPIs"],["F-B01","PPN 026 social value bid"]]],
+    ["Phase 2 · Extend the record", "February to December 2027", [
+      ["F-023","Trust Score"],["SG-07","Provisional vs full scores"],["FS-01","Financial Standing"],["TD-03","Watchlist alerts"],["CM-01","Owners and RAG"],["CM-04","Change control"],
+      ["PAY-07","Payment reporting"],["PAY-08","Pricing and service credits"],["AD-02","Payment status API"],["AD-01","Award intake API"],["CL-17","Chain: subcontractors"],["WK-01","Worker"]]],
+    ["Phase 3 · Distribute and monetise", "2028 onwards", [
+      ["F-025","Licensed Score for lenders"],["FIN-06","Invoice finance on verified invoices"],["FIN-08","Early payment through partners"],["FIN-07","Mobilisation capital"],["BR-02","Licensed data feeds"],["ERP","Oracle, Unit4 and SAP connectors"]]]
+  ];
+  return `
+  <section class="stack"><p class="eyebrow">Roadmap</p><h2>What’s built when</h2>
+  <p class="lede">The screens in this demo mix phases so you can see the whole idea. Here is what each phase delivers.</p></section>
+  ${P.map(p => `<section class="panel phase"><div class="spread"><h3>${p[0]}</h3><span class="note">${p[1]}</span></div>
+    <div class="chips">${p[2].map(f => `<span class="chip"><code>${f[0]}</code>${f[1]}</span>`).join("")}</div></section>`).join("")}
+  <p class="note">Not in Standara: lending or holding money, ranking suppliers, supplier matching (Connect), or becoming a payment institution.</p>`;
+}
+
+/* ---------- Module views added: Delivery evidence, Comply, Trust Score, Finance ---------- */
+function evidenceItems() {
+  const out = [];
+  S.commitments.forEach(c => {
+    const a = assurance(c);
+    const base = {c, a};
+    if (c.id === "C1") out.push({...base, what:"Repairs system log: 412 emergency jobs in October", how:"Sent from the council’s repairs system", when:"31 Oct 18:00", where:"Borough-wide", who:"Confirmed by Dana Okafor, council contract manager"});
+    if (c.id === "C2") out.push({...base, what:"Completion photos and checklists for 40 void homes", how:"Captured in the app: time and location locked, tamper-proof", when:"30 Oct 16:42", where:"40 addresses, location matched", who: c.ev === "corroborated" ? "Confirmed by Dana Okafor, council contract manager" : c.ev === "disputed" ? "Disputed by Dana Okafor: 6 homes not to standard" : "Waiting for the council to confirm"});
+    if (c.id === "C3") {
+      out.push({...base, a: 3, what:"Apprentice site check-ins, days 1 to 3", how:"Worker check-in at the site gate", when:"21 Oct 07:55", where:"Hollins Road site", who:"Matched to the apprentices’ verified identities"});
+      out.push({...base, a: c.done === c.days ? 3 : 0, what:"Apprentice attendance, days 4 and 5", how: c.done === c.days ? "Site sign-in sheet, checked by the council" : "Nothing recorded yet", when: c.done === c.days ? "6 Nov" : "—", where:"Hollins Road site", who: c.done === c.days ? "Confirmed by Dana Okafor, council contract manager" : "Missing"});
+    }
+    if (c.id === "C4") out.push({...base, what: c.ev === "self" ? "Supplier statement: all gas certificates done" : "Gas safety certificates for 40 homes", how: c.ev === "self" ? "Typed by the supplier, nothing attached" : "Uploaded by the supplier", when:"1 Nov 11:20", where:"—", who: a === 3 ? "Confirmed" : "Not yet confirmed"});
+    if (c.id === "C5") out.push({...base, what: c.ev === "none" ? "October performance report" : "October performance report (uploaded)", how: c.ev === "none" ? "Not received" : "Uploaded by the supplier", when: c.ev === "none" ? "Due 5 Nov" : "6 Nov", where:"—", who: a === 3 ? "Confirmed" : "Not yet confirmed"});
+  });
+  return out;
+}
+function vEvidence() {
+  const items = evidenceItems(), f = S.evFilter;
+  const shown = items.filter(i => f === "all" || String(i.a) === f);
+  const count = l => items.filter(i => i.a === l).length;
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="stack"><p class="eyebrow">Module · Comply</p><h2>Delivery evidence</h2>
+    <p class="lede">Every piece of proof for this contract, with how it was captured and who confirmed it. Photos taken in the app have their time and place locked, so they cannot be swapped later.</p></section>
+  <div class="row" role="group" aria-label="Filter by assurance">
+    ${[["all","All",items.length],["3","Assurance 3",count(3)],["2","Assurance 2",count(2)],["1","Assurance 1",count(1)],["0","Missing",count(0)]].map(b=>`<button class="btn ${f===b[0]?"primary":""}" data-act="evf" data-id="${b[0]}">${b[1]} (${b[2]})</button>`).join("")}
+  </div>
+  <section class="panel">
+    ${shown.map(i => `<div class="commit"><div class="stripe s-${i.a===3?"green":i.a===0?"red":"amber"}" aria-hidden="true"></div><div class="stack" style="gap:6px">
+      <div class="spread"><h4>${i.what}</h4>${asHTML(i.a)}</div>
+      <p class="meta">For: ${i.c.title}</p>
+      <dl class="kv" style="font-size:13px"><dt>How captured</dt><dd>${i.how}</dd><dt>When</dt><dd>${i.when}</dd><dt>Where</dt><dd>${i.where}</dd><dt>Confirmation</dt><dd>${i.who}</dd></dl>
+      ${commitActions(i.c) ? `<div class="row">${commitActions(i.c)}</div>` : ""}
+    </div></div>`).join("") || `<p class="note">No evidence at this level.</p>`}
+  </section>`;
+}
+
+
+const CONFIRMER = {
+  C1: {who:"Council repairs system and Dana Okafor", how:"System log matched job by job, then signed off"},
+  C2: {who:"Lee Turner, council voids inspector", how:"Inspects a sample of homes and checks every photo against its address"},
+  C3: {who:"Lee Turner, council voids inspector", how:"Checks the site sign-in sheet against the apprentices’ verified identities"},
+  C4: {who:"Gas Safe Register", how:"Each certificate number checked against the register"},
+  C5: {who:"Dana Okafor, council contract manager", how:"Reviews the report against the evidence already held"}
+};
+
+const PROMISE = {
+  C1: {src:"Contract Schedule 2, KPI 1", date:"Signed 1 Apr 2026", text:"Attend every emergency repair within 24 hours of the tenant’s call.", measure:"Checked monthly against the council’s repairs log"},
+  C2: {src:"Tender answer 4.3, written into Contract Schedule 3", date:"Tendered 12 Feb 2026 · contracted 1 Apr 2026 · October order 1 Oct 2026", text:"Return each void home to the council’s lettable standard within 20 days. October order: 40 homes.", measure:"Each home checked against the lettable standard"},
+  C3: {src:"Social value answer 7.1, written into Contract Schedule 5", date:"Tendered 12 Feb 2026 · contracted 1 Apr 2026", text:"Employ two apprentices on this contract, on site five days a week.", measure:"Daily attendance of both apprentices"},
+  C4: {src:"Contract Schedule 4, statutory compliance", date:"Signed 1 Apr 2026", text:"Provide a gas safety certificate for every void home before handing it back.", measure:"One valid certificate per home"},
+  C5: {src:"Contract Schedule 6, reporting", date:"Signed 1 Apr 2026", text:"Send a monthly performance report by the 5th of the following month.", measure:"Report received on time and matching the evidence held"}
+};
+function promiseHTML(c, compact) {
+  const pr = PROMISE[c.id];
+  if (compact) return `<p class="meta">Promised: ${pr.src} · ${pr.date.split(" · ")[0]}</p>`;
+  return `<div class="promise"><p class="eyebrow">What was promised to the council</p><blockquote>“${pr.text}”</blockquote>
+    <dl class="kv" style="font-size:13px"><dt>Where</dt><dd>${pr.src}</dd><dt>When</dt><dd>${pr.date}</dd><dt>Due</dt><dd>${c.period}, by ${new Date(c.due).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</dd><dt>How it is measured</dt><dd>${pr.measure}</dd></dl></div>`;
+}
+function corrSection() {
+  const items = S.commitments;
+  const card = c => {
+    const a = assurance(c), req = S.corr[c.id] || a === 3, conf = CONFIRMER[c.id], disputed = c.ev === "disputed";
+    const steps = [
+      ["Promised to the council", true, PROMISE[c.id].src + " · " + PROMISE[c.id].date.split(" · ").pop()],
+      ["Evidence submitted by the supplier", a >= 2 || disputed, a >= 2 ? "Assurance 2 · document-backed" : "Nothing attached yet"],
+      ["Confirmation requested from someone independent", req || disputed, conf.who],
+      ["Independence checked", req || disputed, "Not employed by or connected to Demo Build Co. · different organisation and verified email · did not raise the invoice"],
+      [disputed ? "Disputed" : "Confirmed: now Assurance 3", a === 3 || disputed, disputed ? c.by : (a === 3 ? "Confirmed. Linked invoices can now be released" : conf.how)]
+    ];
+    let act = "";
+    if (disputed) act = S.role === "supplier" ? `<button class="btn" data-act="ev-doc" data-id="${c.id}">Add more evidence</button>` : `<span class="note">The supplier sees the reason and can add evidence.</span>`;
+    else if (a < 2) act = S.role === "supplier" ? `<button class="btn primary" data-act="ev-doc" data-id="${c.id}">Attach evidence</button>` : `<span class="note">The supplier must add evidence first.</span>${c.ev === "self" || c.ev === "none" ? ` <button class="btn" data-act="request" data-id="${c.id}">Ask supplier for evidence</button>` : ""}`;
+    else if (a < 3 && !S.corr[c.id]) act = `<button class="btn primary" data-act="corrreq" data-id="${c.id}">Request independent confirmation</button>`;
+    else if (a < 3) act = S.role === "buyer"
+      ? (c.ev === "partial" ? `<button class="btn primary" data-act="days" data-id="${c.id}">Confirm days 4 and 5</button>` : `<button class="btn primary" data-act="confirm" data-id="${c.id}">Confirm delivered</button><button class="btn warn" data-act="dispute" data-id="${c.id}">Dispute</button>`)
+      : `<span class="note">Waiting for ${conf.who}.</span>`;
+    return `<div class="panel stack">
+      <div class="spread"><h4 style="margin:0">${c.title}</h4>${asHTML(a)}</div>
+      ${promiseHTML(c)}
+      <ul class="checks">${steps.map(st => `<li><span class="tick ${st[1] ? "done" : ""}" aria-hidden="true">${st[1] ? "✓" : ""}</span><div><b>${st[0]}</b><div class="meta">${st[2]}</div></div><div></div></li>`).join("")}</ul>
+      ${act ? `<div class="row">${act}</div>` : ""}
+    </div>`;
+  };
+  return `<section class="stack">
+    <h3>Corroborate delivery evidence</h3>
+    <p class="note">Each card starts with what the supplier promised the council, where and when, so everyone checks delivery against the same words. The supplier’s own evidence is never the last word: Standara asks someone independent to confirm it, checks that they really are independent, and only then counts it as Assurance 3. Try it: request confirmation on the void works, then confirm or dispute it as the council.</p>
+    ${items.map(card).join("")}
+  </section>`;
+}
+function vComply() {
+  const st = {valid:["Valid","p-green"], expiring:["Expires soon","p-amber"], expired:["Expired","p-red"], clear:["Clear","p-green"], flag:["Check needed","p-amber"]};
+  const due = S.comply.filter(k => k.status === "expiring" || k.status === "expired").length;
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="stack"><p class="eyebrow">Module · Comply</p><h2>Compliance during the contract</h2>
+    <p class="lede">Comply does two jobs for the whole contract: it gets the supplier’s delivery evidence independently confirmed, and it keeps checking the supplier’s certificates and status, not just at the tender.</p></section>
+  ${corrSection()}
+  <h3>Supplier compliance checks</h3>
+  <section class="grid2">
+    <div class="panel"><p class="eyebrow">Checks passing</p><p class="score">${S.comply.length - due} of ${S.comply.length}</p></div>
+    <div class="panel"><p class="eyebrow">Need action</p><p class="score" style="color:${due ? "var(--bad)" : "var(--good)"}">${due}</p></div>
+  </section>
+  <section class="panel">
+    <div class="scroll"><table><thead><tr><th>Check</th><th>Status</th><th>Source</th><th></th></tr></thead><tbody>
+    ${S.comply.map(k => {
+      let act = "";
+      if ((k.status === "expiring" || k.status === "expired") && S.role === "buyer") act = k.chased ? `<span class="note">Chased ${k.chased}</span>` : `<button class="btn" data-act="chase" data-id="${k.id}">Chase supplier</button>`;
+      if ((k.status === "expiring" || k.status === "expired") && S.role === "supplier") act = `<button class="btn primary" data-act="renew" data-id="${k.id}">Upload renewal</button>`;
+      return `<tr><td><b>${k.name}</b>${k.expires ? `<div class="meta">${k.status === "expired" ? "Expired" : "Expires"} ${k.expires}</div>` : ""}</td><td><span class="pill ${st[k.status][1]}">${st[k.status][0]}</span></td><td class="meta">${k.source}</td><td>${act}</td></tr>`;}).join("")}
+    </tbody></table></div>
+  </section>
+  <section class="panel stack">
+    <h3>Subcontractors on this contract</h3>
+    <p class="note">The same checks run down the supply chain, so the council knows who is really on site.</p>
+    <div class="scroll"><table><tbody>
+      <tr><td><b>Demo Electrical Co.</b><div class="meta">Rewiring, void homes</div></td><td><span class="pill p-green">All checks clear</span></td><td class="meta">Paid within 30 days: confirmed by the subcontractor</td></tr>
+      <tr><td><b>Demo Roofing Co.</b><div class="meta">Roof repairs</div></td><td><span class="pill p-amber">Accounts overdue at Companies House</span></td><td class="meta">On the council’s watchlist; no action required yet</td></tr>
+      <tr><td><b>Demo Scaffolding Co.</b><div class="meta">Scaffolding</div></td><td><span class="pill ${S.shared === "bad" ? "p-red" : S.shared === "ok" ? "p-green" : "p-amber"}">${S.shared === "bad" ? "Escalated to counter-fraud" : S.shared === "ok" ? "Shared account explained" : "Shared bank account flag"}</span></td><td class="meta">See Bank details</td></tr>
+    </tbody></table></div>
+  </section>`;
+}
+
+function scoreParts() {
+  const a3 = S.commitments.filter(c => assurance(c) === 3).length;
+  const disputed = S.commitments.some(c => c.ev === "disputed");
+  const delivery = Math.min(95, 78 + 2 * (a3 - 1) - (disputed ? 4 : 0));
+  const fin = 74, acc = S.comply.some(k => k.status === "expired") ? 76 : 80;
+  return {delivery, fin, acc, total: Math.round(delivery * 0.5 + fin * 0.25 + acc * 0.25), a3};
+}
+
+const BANDS = [[0,49,"Limited","var(--b1)"],[50,64,"Developing","var(--b2)"],[65,74,"Established","var(--b3)"],[75,84,"Strong","var(--b4)"],[85,100,"Exceptional","var(--b5)"]];
+const bandOf = v => BANDS.find(b => v >= b[0] && v <= b[1]);
+function arcPath(cx, cy, r, v1, v2) {
+  const pt = v => { const a = Math.PI - v / 100 * Math.PI; return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; };
+  const [x1, y1] = pt(v1), [x2, y2] = pt(v2);
+  return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+}
+function scoreDial(score, parts, provisional) {
+  const cx = 150, cy = 158, R0 = 132, band = bandOf(score);
+  const a = Math.PI - score / 100 * Math.PI, mx = cx + R0 * Math.cos(a), my = cy - R0 * Math.sin(a);
+  const rings = [["Delivery", parts.delivery, "var(--teal)", 108], ["Financial standing", parts.fin, "var(--info)", 97], ["Accreditation", parts.acc, "var(--amber)", 86]];
+  return `<svg viewBox="0 0 300 182" width="100%" style="max-width:340px" role="img" aria-label="Trust Score ${score} out of 100, ${provisional ? "provisional" : band[2]}">
+    ${BANDS.map(b => `<path d="${arcPath(cx, cy, R0, b[0] + (b[0] ? 0.8 : 0), b[1] + (b[1] < 100 ? 0.2 : 0))}" stroke="${b[3]}" stroke-width="16" fill="none" ${provisional ? 'stroke-dasharray="3 4" opacity=".55"' : ""}/>`).join("")}
+    ${rings.map(r => `<path d="${arcPath(cx, cy, r[3], 0, 100)}" stroke="var(--sunk)" stroke-width="7" fill="none" stroke-linecap="round"/>` +
+       (provisional && r[0] === "Delivery" ? "" : `<path d="${arcPath(cx, cy, r[3], 0, r[1])}" stroke="${r[2]}" stroke-width="7" fill="none" stroke-linecap="round"/>`)).join("")}
+    <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="11" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+    <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="4" fill="${provisional ? "var(--surface)" : "var(--ink)"}"/>
+    <text x="${cx}" y="${cy - 26}" text-anchor="middle" font-family="var(--f-display)" font-size="54" font-weight="600" fill="${provisional ? "var(--muted)" : "var(--ink)"}">${score}</text>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="11" letter-spacing="1.4" font-weight="600" fill="var(--muted)">${provisional ? "PROVISIONAL" : band[2].toUpperCase()}</text>
+    <text x="${cx - R0}" y="${cy + 20}" text-anchor="middle" font-size="10" fill="var(--muted)">0</text>
+    <text x="${cx + R0}" y="${cy + 20}" text-anchor="middle" font-size="10" fill="var(--muted)">100</text>
+  </svg>`;
+}
+function scoreFactors(p) {
+  const f = [];
+  f.push(["up", `${p.a3} of ${S.commitments.length} promises on this contract independently confirmed`]);
+  f.push(["up", "14 closed commitments delivered across 4 public contracts"]);
+  f.push(["up", "Councils paid 14 of 14 earlier invoices without dispute"]);
+  const waiting = S.commitments.filter(c => assurance(c) > 0 && assurance(c) < 3).length;
+  if (waiting) f.push(["flat", `${waiting} piece${waiting === 1 ? "" : "s"} of evidence waiting for independent confirmation`]);
+  if (S.commitments.some(c => c.ev === "disputed")) f.push(["down", "Delivery disputed by the council"]);
+  if (S.comply.some(k => k.status === "expired")) f.push(["down", "Cyber Essentials certificate expired"]);
+  if (S.commitments.some(c => c.ev === "none" && new Date(c.due) < TODAY)) f.push(["down", "Monthly report overdue"]);
+  const ic = {up: ["▲", "var(--good)"], down: ["▼", "var(--bad)"], flat: ["●", "var(--amber)"]};
+  return `<ul class="factors">${f.map(x => `<li><span style="color:${ic[x[0]][1]}" aria-hidden="true">${ic[x[0]][0]}</span>${x[1]}</li>`).join("")}</ul>`;
+}
+function vScore() {
+  const p = scoreParts();
+  const hist = [72, 73, 75, 76, 77, p.total], months = ["Jun","Jul","Aug","Sep","Oct","Now"];
+  const W = 320, H = 110, x = i => 20 + i * (W - 40) / 5, y = v => H - 20 - (v - 65) * (H - 40) / 30;
+  const pts = hist.map((v,i) => `${x(i)},${y(v)}`).join(" ");
+  const comp = [["Delivery", p.delivery, "50%", "From verified delivery on closed and live commitments. Independently confirmed evidence counts most."],
+                ["Financial standing", p.fin, "25%", "Accounts, credit data and public commitments against capacity."],
+                ["Accreditation", p.acc, "25%", "Certificates, insurance and registrations, checked against the issuer where possible."]];
+  return `
+  <section class="stack"><p class="eyebrow">Standara Contract Performance Bureau · Score</p><h2>Trust Score report</h2>
+    <p class="lede">A score built from what the supplier has actually delivered, not what it says about itself. It is a signal for buyers and lenders, never a verdict, and suppliers are never ranked against each other.</p></section>
+  <section class="panel scorecard">
+    <div class="sc-dial">
+      ${scoreDial(p.total, p, false)}
+      <div class="legend" style="justify-content:center">${[["Delivery","var(--teal)"],["Financial standing","var(--info)"],["Accreditation","var(--amber)"]].map(l => `<span><b style="background:${l[1]}"></b>${l[0]}</span>`).join("")}</div>
+    </div>
+    <div class="stack" style="min-width:0">
+      <div><p class="eyebrow">Contract Performance Bureau · report CPB-04417 · Demo Build Co.</p><h3>${bandOf(p.total)[2]} · ${p.total} out of 100</h3>
+        <p class="note">Full score from 14 closed commitments. Updated 6 Nov 2026, live from the record.</p></div>
+      <div class="bandscale">${BANDS.map(b => `<div class="${bandOf(p.total) === b ? "on" : ""}"><i style="background:${b[3]}"></i><span>${b[2]}</span><em>${b[0]}–${b[1]}</em></div>`).join("")}</div>
+      <div><p class="eyebrow" style="margin-bottom:6px">What is moving the score</p>${scoreFactors(p)}</div>
+      <div><p class="eyebrow" style="margin-bottom:2px">Last six months</p>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Score over six months, from ${hist[0]} to ${p.total}" style="max-width:${W}px">
+        ${[70,80,90].map(v=>`<line x1="20" x2="${W-20}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="0" y="${y(v)+4}" font-size="10" fill="var(--muted)">${v}</text>`).join("")}
+        <polyline points="${pts}" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+        <circle cx="${x(5)}" cy="${y(p.total)}" r="4.5" fill="var(--teal)"/>
+        ${months.map((m,i)=>`<text x="${x(i)}" y="${H-4}" font-size="10" text-anchor="middle" fill="var(--muted)">${m}</text>`).join("")}
+      </svg></div>
+    </div>
+  </section>
+  <section class="panel scorecard">
+    <div class="sc-dial">${scoreDial(75, {delivery:0, fin:72, acc:78}, true)}</div>
+    <div class="stack" style="min-width:0">
+      <div><p class="eyebrow">Compare: a new supplier · Demo Facilities Co.</p><h3>Provisional · no delivery history yet</h3></div>
+      <dl class="kv"><dt>Delivery</dt><dd>Building record (0 closed commitments)</dd><dt>Score from</dt><dd>Financial standing and accreditation only, capped at 75</dd></dl>
+      <p class="note">Drawn dashed and kept apart from full scores, so a provisional 75 is never read as better than a proven ${p.total}. New suppliers get a fair route: a “start smaller” contract value, never a “no”.</p>
+    </div>
+  </section>
+  <section class="panel stack">
+    <h3>What makes up the score</h3>
+    <p class="note">Three quarters of the score comes from two sources: delivery evidence the council has confirmed, and checked financial standing.</p>
+    ${comp.map(c => `<div class="stack" style="gap:6px"><div class="spread"><b>${c[0]} <span class="meta">· weight ${c[2]}</span></b><span style="font-variant-numeric:tabular-nums;font-weight:600">${c[1]}</span></div>
+      <div class="bar"><span style="width:${c[1]}%;background:var(--teal)"></span></div><p class="note">${c[3]}</p></div>`).join("")}
+  </section>
+  ${fundingAccess(p)}
+  <section class="grid2">
+    <div class="panel stack"><h3>Recommended contract value</h3><p class="score" style="font-size:30px">£5m to £20m</p>
+      <p class="note">What this supplier can safely take on, based on verified delivery and financial standing. Company age is never used.</p></div>
+    <div class="panel stack"><h3>Who uses the score</h3>
+      <dl class="kv"><dt>Councils</dt><dd>Checking bidders and watching live suppliers</dd><dt>Lenders</dt><dd>Pricing finance against verified delivery (Phase 3)</dd><dt>The supplier</dt><dd>Sees its own score and every item behind it, free</dd></dl></div>
+  </section>`;
+}
+
+
+function fundingBand(p) { return p.total >= 75 ? 0 : p.total >= 65 ? 1 : 2; }
+function fundingAccess(p) {
+  const band = fundingBand(p);
+  const rows = [["75 and above, full score", "Up to 90% of verified invoices", "Up to £250,000", "Lower premiums on verified record"],
+                ["65 to 74", "Up to 85% of verified invoices", "Up to £100,000", "Standard premiums"],
+                ["Below 65, or provisional", "Verified invoices only, smaller advance", "Start smaller, build the record", "Referral with extra checks"]];
+  return `<section class="panel stack" id="funding-access">
+    <div class="spread"><h3>How the score opens up funding</h3><span class="note">Illustrative · each lender sets its own criteria</span></div>
+    <p class="note">Lenders trust this score because it is built from delivery the council has confirmed and from checked financial standing, not from what the supplier says. A higher score means more funding, on better terms.</p>
+    <div class="scroll"><table><thead><tr><th>Trust Score</th><th>Invoice finance</th><th>Mobilisation capital</th><th>Bonds</th></tr></thead><tbody>
+    ${rows.map((r,i)=>`<tr style="${i===band ? "background:var(--teal-soft)" : ""}"><td><b>${r[0]}</b>${i===band ? `<div class="meta">Demo Build Co. is here (${p.total})</div>` : ""}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}
+    </tbody></table></div></section>`;
+}
+function fundTypes() {
+  const p = scoreParts(), verified = S.invoices.filter(i => invStatus(i).s === "Release").length, band = fundingBand(p);
+  const types = [
+    ["Invoice finance", "Get up to 90% of a verified invoice now, instead of waiting up to 30 days for the council.", verified ? [`${verified} verified invoice${verified === 1 ? "" : "s"} eligible`, "p-green"] : ["No verified invoices yet", "p-muted"], "Only invoices the council has verified can be funded, so lenders take less risk and charge less."],
+    ["Early payment", "Example Borough Council pays verified invoices within 10 days for a 1% discount.", verified ? ["Available on verified invoices", "p-green"] : ["Not yet", "p-muted"], "Offered by the council itself, or by a funder on its behalf."],
+    ["Mobilisation capital", "Working capital between winning a contract and sending the first invoice: staff, materials, set-up.", band === 2 ? ["Start smaller", "p-amber"] : [band === 0 ? "Indicative: up to £250,000" : "Indicative: up to £100,000", "p-green"], `Sized by the Trust Score (${p.total}) and financial standing, against the value of the contract won.`],
+    ["Performance and retention bonds", "Bonds from surety partners that many public contracts require.", ["Referral available", "p-info"], "A verified delivery record can mean a lower premium and less cash tied up."]
+  ];
+  return `<section class="stack" id="fund-types"><h3>Types of funding available</h3><div class="grid2">${types.map(t => `<div class="panel stack">
+    <div class="spread"><b>${t[0]}</b><span class="pill ${t[2][1]}">${t[2][0]}</span></div><p class="note">${t[1]}</p><p class="meta"><b>How your score helps:</b> ${t[3]}</p></div>`).join("")}</div></section>`;
+}
+const FULL_VIEW = ["Company details and directors, checked with Companies House", "Every public contract, its promises and the evidence behind each one", "Assurance level and who confirmed each piece of evidence", "Invoices and their payment status", "Compliance checks: insurance, registrations, certificates", "Financial standing: accounts, credit data, public commitments", "Bank details status (never the full account number)", "Subcontractors and how promptly they are paid", "The full contract trail"];
+function vFinance() {
+  const sup = S.role === "supplier";
+  const rows = S.invoices.map(i => ({i, st: invStatus(i)}));
+  const lo = S.lender.offer;
+  const offers = [["Demo Lender One", lo ? lo.adv + "%" : "90%", (lo ? lo.fee : "1.4") + "% for 30 days"], ["Demo Lender Two", "85%", "1.1% for 30 days"]];
+  return `
+  <div class="roleban">${roleBanner[S.role]}</div>
+  <section class="stack"><div class="row"><p class="eyebrow">Module · Finance</p><span class="pill p-info">Phase 3</span></div><h2>Finance on verified delivery</h2>
+    <p class="lede">Because Standara has already proven the work was done, lenders can fund suppliers faster and cheaper. Partner lenders decide and lend. Standara never lends, never holds money and never takes credit risk.</p></section>
+  ${fundTypes()}
+  <section class="panel stack">
+    <h3>1. Give lenders a full view of your record</h3>
+    <p class="note">To lend, a lender needs to see everything. When you ask for funding, you can give the lenders you choose a full view of your Standara record. Nothing is shared without your consent.</p>
+    <ul style="margin:0;padding-left:20px;font-size:13.5px;color:var(--muted)">${FULL_VIEW.map(x => `<li>${x}</li>`).join("")}</ul>
+    <dl class="kv" style="font-size:13px"><dt>Who sees it</dt><dd>Only the lenders you ask for funding: Demo Lender One and Demo Lender Two</dd><dt>For how long</dt><dd>Until the funding is repaid, or 12 months at most</dd><dt>Withdraw</dt><dd>At any time, for future decisions</dd></dl>
+    ${S.fin.consent ? `<p class="pill p-green">Full view given to Demo Lender One and Demo Lender Two</p>${sup ? `<div><button class="btn" data-act="withdraw">Withdraw consent</button></div>` : ""}` : sup ? `<div><button class="btn primary" data-act="consent">Give partner lenders full view</button></div>` : `<p class="note">Only the supplier can give consent. Switch to Supplier to try it.</p>`}
+  </section>
+  <section class="panel stack">
+    <h3>2. Invoices that can be financed</h3>
+    <div class="scroll"><table><thead><tr><th>Invoice</th><th class="num">Amount</th><th>Eligible?</th><th></th></tr></thead><tbody>
+    ${rows.map(x => {
+      const ok = x.st.s === "Release", req = S.fin.req[x.i.id];
+      let act = "";
+      if (ok && sup && S.fin.consent && !req) act = `<button class="btn primary" data-act="fund" data-id="${x.i.id}">Get offers</button>`;
+      return `<tr><td><b>${x.i.id}</b><div class="meta">${x.i.desc}</div></td><td class="num">${fmt(x.i.amount)}</td>
+        <td>${ok ? `<span class="pill p-green">Eligible: delivery verified</span>` : `<span class="pill p-muted">Not yet: ${x.st.s === "Hold" ? "delivery not verified" : "in review"}</span>`}</td><td>${act}</td></tr>
+        ${req ? `<tr><td colspan="4"><div class="inline-form" style="flex-direction:column;align-items:stretch">
+          ${offers.map(o => `<div class="spread"><b>${o[0]}</b><span>Advance ${o[1]} (${fmt(Math.round(x.i.amount * parseInt(o[1]) / 100))}) · fee ${o[2]}</span>${req === o[0] ? `<span class="pill p-green">Accepted. The lender pays you directly</span>` : (req === true ? `<button class="btn" data-act="accept" data-id="${x.i.id}" data-lender="${o[0]}">Accept</button>` : "")}</div>`).join("")}
+          <p class="note">Illustrative offers. Each lender priced the same verified data; Standara does not recommend one.</p></div></td></tr>` : ""}`;}).join("")}
+    </tbody></table></div>
+    <p class="note">As the council confirms more delivery, more invoices become eligible.</p>
+  </section>`;
+}
+
+
+function vInfra() {
+  const lv = [0,0,0,0]; S.commitments.forEach(c => lv[assurance(c)]++);
+  const p = scoreParts(), n = S.commitments.length;
+  const paid = S.invoices.filter(i => invStatus(i).s === "Release").length;
+  return `
+  <section class="stack"><p class="eyebrow">The bigger picture</p><h2>Two layers of infrastructure</h2>
+    <p class="lede">Every screen in this demo feeds two things others can build on. First, a trusted record of what was delivered on public contracts. Then, because that record is trusted, a way for lenders to decide who to fund.</p></section>
+  <section class="panel stack">
+    <div class="spread"><h3>1. Delivery evidence infrastructure</h3><span class="pill p-green">Built from Phase 1</span></div>
+    <p class="note">The shared, neutral record of what was promised and what was proven, in an open format anyone can read.</p>
+    <div class="grid2">
+      ${[["Promise","Each commitment from the tender and contract, with its source and due date."],
+         ["Evidence","Captured in the app or sent from council systems, time and place locked."],
+         ["Confirmation","Checked by someone independent; graded on the open Standara Assurance Scale."],
+         ["Open record","Exportable in a published, open format; councils are never locked in."]].map(x=>`<div class="stack" style="gap:4px"><b>${x[0]}</b><p class="note">${x[1]}</p></div>`).join("")}
+    </div>
+    <dl class="kv"><dt>Used by</dt><dd>Councils paying invoices, auditors, framework operators, and the planned BSI delivery evidence standard</dd>
+      <dt>On this contract now</dt><dd>${n} promises · ${lv[3]} at Assurance 3 · ${paid} of ${S.invoices.length} invoices cleared on proof</dd></dl>
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h3>2. Credit infrastructure</h3><span class="pill p-info">Phase 3</span></div>
+    <p class="note">Because delivery is proven, lenders, insurers and surety providers can check Standara before they extend credit to a public-sector supplier, as they check a credit bureau today.</p>
+    <div class="grid2">
+      ${[["Verified delivery","What the supplier has actually delivered, not what it claims."],
+         ["Payment conduct","How promptly it is paid, and how promptly it pays its own subcontractors."],
+         ["Trust Score","A signal built from both, with every item traceable."],
+         ["Consent first","Nothing reaches a lender unless the supplier agrees, and it can withdraw."]].map(x=>`<div class="stack" style="gap:4px"><b>${x[0]}</b><p class="note">${x[1]}</p></div>`).join("")}
+    </div>
+  </section>
+  <section class="panel stack">
+    <div class="spread"><h3>What a lender would see</h3><span class="note">With the supplier’s consent · illustrative</span></div>
+    ${S.fin.consent ? `<dl class="kv">
+      <dt>Supplier</dt><dd>Demo Build Co.</dd>
+      <dt>Trust Score</dt><dd>${p.total}, full score from 14 closed commitments</dd>
+      <dt>Live public contracts</dt><dd>£9.1m across 3 councils</dd>
+      <dt>Evidence on this contract</dt><dd>${lv[3]} of ${n} promises independently confirmed</dd>
+      <dt>Verified invoices</dt><dd>${paid} cleared for payment by the council</dd>
+      <dt>Recommended contract value</dt><dd>£5m to £20m</dd></dl>
+      <p class="note">The lender decides, prices and funds. Standara supplies verified facts and never lends, holds money or takes credit risk.</p>`
+      : `<p class="note">Nothing is shared yet. The supplier gives consent on the <a href="#finance">Finance</a> tab; until then, a lender sees nothing.</p>`}
+  </section>
+  <section class="panel stack">
+    <h3>How one leads to the other</h3>
+    <div class="steps">${["Promise","Evidence","Independent confirmation","Verified record","Trust Score","Credit decision by a lender"].map((x,i)=>`<div class="step"><span class="n">${i+1}</span><b>${x}</b></div>`).join("")}</div>
+    <p class="note">Steps 1 to 4 are the delivery evidence infrastructure. Steps 5 and 6 are the credit infrastructure that runs on it. Together they make Standara the <a href="#bureau">Contract Performance Bureau</a>.</p>
+  </section>`;
+}
+
+
+function fullView() {
+  if (!S.fin.consent) return `<section class="panel stack" id="lender-full"><h3>Full supplier view</h3><p class="note">Locked until the supplier gives you full view.</p></section>`;
+  const p = scoreParts();
+  const st = {valid:"Valid", expiring:"Expires soon", expired:"Expired", clear:"Clear"};
+  const block = (title, body, open) => `<details ${open ? "open" : ""} class="fv"><summary>${title}</summary><div class="fvb">${body}</div></details>`;
+  return `<section class="panel stack" id="lender-full">
+    <div class="spread"><h3>Full supplier view · Demo Build Co.</h3><span class="pill p-green">Full view given by the supplier</span></div>
+    <p class="note">Everything Standara holds about the supplier, live. Shared because Demo Build Co. asked you for funding. Access ends when the funding is repaid.</p>
+    ${block("Company", `<dl class="kv"><dt>Company number</dt><dd>00000000 (demo) · active · incorporated 2011</dd><dt>Directors</dt><dd>J. Morris, A. Begum · identity checked</dd><dt>Sector</dt><dd>Construction and housing repairs</dd><dt>Group</dt><dd>No parent company; no linked companies</dd></dl>`, true)}
+    ${block(`Trust Score ${p.total}`, `<dl class="kv"><dt>Delivery</dt><dd>${p.delivery} (weight 50%) · 14 closed commitments</dd><dt>Financial standing</dt><dd>${p.fin} (weight 25%)</dd><dt>Accreditation</dt><dd>${p.acc} (weight 25%)</dd><dt>Recommended contract value</dt><dd>£5m to £20m</dd></dl>`)}
+    ${block("Public contracts", `<div class="scroll"><table><thead><tr><th>Contract</th><th>Buyer</th><th class="num">Value</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Responsive repairs and voids, Lot 2</td><td>Example Borough Council</td><td class="num">£6.2m</td><td>Live</td></tr>
+      <tr><td>Planned kitchen and bathroom renewals</td><td>Demo City Council</td><td class="num">£2.1m</td><td>Live</td></tr>
+      <tr><td>Damp and mould remediation</td><td>Demo Housing Association</td><td class="num">£0.8m</td><td>Live</td></tr>
+      <tr><td>School roof repairs 2024</td><td>Demo County Council</td><td class="num">£0.6m</td><td>Closed · delivered</td></tr></tbody></table></div>`)}
+    ${block("Promises and evidence on this contract", `<div class="scroll"><table><thead><tr><th>Promise</th><th>Evidence</th><th>Status</th></tr></thead><tbody>
+      ${S.commitments.map(c => `<tr><td>${c.title}</td><td>${asHTML(assurance(c))}</td><td><span class="pill p-${rag(c)}">${RAG_TXT[rag(c)]}</span></td></tr>`).join("")}</tbody></table></div>`)}
+    ${block("Invoices and payments", `<div class="scroll"><table><tbody>${S.invoices.map(i => { const x = invStatus(i); return `<tr><td>${i.id}<div class="meta">${i.desc}</div></td><td class="num">${fmt(i.amount)}</td><td><span class="pill p-${x.s.toLowerCase()}">${x.s}</span><div class="meta">${x.cause}</div></td></tr>`; }).join("")}</tbody></table></div><p class="note">Earlier invoices: 14 of 14 paid by councils without dispute.</p>`)}
+    ${block("Compliance", `<div class="scroll"><table><tbody>${S.comply.map(k => `<tr><td>${k.name}</td><td>${st[k.status]}${k.expires ? ` · ${k.expires}` : ""}</td></tr>`).join("")}</tbody></table></div>`)}
+    ${block("Financial standing", `<dl class="kv"><dt>Turnover</dt><dd>£15.4m (last filed accounts)</dd><dt>Against this contract</dt><dd>2.4 times the annual contract value</dd><dt>Public commitments</dt><dd>£9.1m live across 3 buyers</dd><dt>Credit data</dt><dd>No court judgments; no distress events</dd><dt>Accounts filed</dt><dd>On time</dd></dl>`)}
+    ${block("Bank details", `<dl class="kv"><dt>Verified account</dt><dd>Ending 2210 · name matches the company</dd><dt>Change requested</dt><dd>${S.bank.step >= 5 ? "New account ending 9031 verified" : S.bank.rejected ? "Change rejected" : "New account ending 9031, checks in progress; payments stay on 2210"}</dd></dl>`)}
+    ${block("Subcontractors", `<dl class="kv"><dt>Demo Electrical Co.</dt><dd>Paid within 30 days, confirmed</dd><dt>Demo Roofing Co.</dt><dd>Accounts overdue at Companies House</dd></dl>`)}
+    ${block("Contract trail", `<ol style="margin:0;padding-left:18px;font-size:13px">${S.trail.slice().reverse().map(e => `<li>${e.t} · <b>${e.who}</b>: ${e.what}</li>`).join("")}</ol>`)}
+  </section>`;
+}
+function vLender() {
+  const p = scoreParts(), inv = S.invoices.find(i => i.id === "INV-1041"), st = invStatus(inv), L = S.lender;
+  const req = S.fin.req["INV-1041"];
+  const lv = [0,0,0,0]; S.commitments.forEach(c => lv[assurance(c)]++);
+  const disputes = S.commitments.filter(c => c.ev === "disputed").length;
+  const checks = [
+    ["Trust Score 65 or above", p.total >= 65, `${p.total}, full score`],
+    ["Invoice verified by the council", st.s === "Release", st.s === "Release" ? "Release: delivery confirmed" : st.s],
+    ["Delivery behind the invoice independently confirmed", assurance(C(inv.links[0])) === 3, AS_NAME[assurance(C(inv.links[0]))]],
+    ["No open disputes on the contract", disputes === 0, disputes ? `${disputes} open` : "None"],
+    ["Bank account verified", true, "Account name matches the company"]
+  ];
+  const adv = L.offer ? L.offer.adv : 90;
+  let app;
+  if (!S.fin.consent) app = `<p class="note">No supplier has shared its record with you. You cannot see Demo Build Co. until it asks you for funding and gives you full view.</p>
+      <div><button class="btn" data-act="consent">Demo: Demo Build Co. gives full view</button></div>`;
+  else if (!req) app = `<p class="note">Demo Build Co. has shared its verified record with you. No funding request yet.</p>
+      <div><button class="btn" data-act="fund" data-id="INV-1041">Demo: Demo Build Co. asks for funding on INV-1041</button></div>`;
+  else app = `<div class="spread"><div><b>Demo Build Co.</b> · invoice finance on INV-1041</div><span class="score" style="font-size:26px">${fmt(inv.amount)}</span></div>
+      <p class="meta">${inv.desc} · Example Borough Council · due for payment by day 30</p>
+      <h4 style="margin:6px 0 0">Your criteria</h4>
+      <ul class="checks">${checks.map(c => `<li><span class="tick ${c[1] ? "done" : ""}" aria-hidden="true">${c[1] ? "✓" : "✗"}</span><div><b>${c[0]}</b><div class="meta">${c[2]}</div></div><div></div></li>`).join("")}</ul>
+      <h4 style="margin:6px 0 0">Verified data pack</h4>
+      <dl class="kv"><dt>Trust Score</dt><dd>${p.total}: delivery ${p.delivery}, financial standing ${p.fin}, accreditation ${p.acc}</dd>
+        <dt>Evidence on this contract</dt><dd>${lv[3]} of ${S.commitments.length} promises at Assurance 3</dd>
+        <dt>Payment history</dt><dd>14 of 14 earlier invoices paid by councils without dispute</dd>
+        <dt>Pays its subcontractors</dt><dd>Within 30 days, confirmed by the subcontractors</dd>
+        <dt>Financial standing</dt><dd>Turnover 2.4 times the annual contract value; no distress events</dd></dl>
+      ${L.declined ? `<p class="pill p-hold">You declined this request. The supplier sees “not offered”; nothing is added to its record.</p>`
+       : L.funded ? `<p class="pill p-release">Funded: ${fmt(Math.round(inv.amount * adv / 100))} paid by you directly to Demo Build Co. Repaid when the council pays the invoice.</p>`
+       : L.offer ? `<p class="pill p-info">Offer sent: ${L.offer.adv}% advance (${fmt(Math.round(inv.amount * L.offer.adv / 100))}), fee ${L.offer.fee}% for 30 days. Waiting for the supplier.</p>
+           <div><button class="btn" data-act="laccept">Demo: supplier accepts your offer</button></div>`
+       : `<div class="inline-form"><label for="l-adv">Advance</label><select id="l-adv"><option>90</option><option>85</option><option>80</option></select><span>%</span>
+           <label for="l-fee">Fee</label><select id="l-fee"><option>1.2</option><option>1.0</option><option>1.4</option></select><span>% for 30 days</span>
+           <button class="btn primary" data-act="loffer">Send offer</button><button class="btn warn" data-act="ldecline">Decline</button></div>`}`;
+  const alerts = [];
+  if (disputes) alerts.push(["Delivery disputed on the contract", "p-hold"]);
+  if (S.comply.some(k => k.status === "expired")) alerts.push(["A certificate has expired (Cyber Essentials)", "p-review"]);
+  if (S.bank.step < 5 && !S.bank.rejected) alerts.push(["Bank-detail change requested; payments still go to the verified account", "p-info"]);
+  return `
+  <div class="roleban">${roleBanner.lender}</div>
+  ${S.role !== "lender" ? `<p class="note">This is the lender’s screen. Switch to Lender at the top to act on it.</p>` : ""}
+  <section class="stack"><div class="row"><p class="eyebrow">Partner lender</p><span class="pill p-info">Phase 3</span></div><h2>Lend against verified delivery</h2>
+    <p class="lede">Partner lenders get facts no credit file holds: whether the work was delivered, who confirmed it, and whether the council has cleared the invoice. The lender sets its own criteria and makes every decision.</p></section>
+  <section class="panel stack"><h3>1. Your lending criteria</h3>
+    <p class="note">Set by Demo Lender One, not by Standara. Standara never decides who gets credit and never steers suppliers to a lender.</p>
+    <dl class="kv"><dt>Products</dt><dd>Invoice finance and mobilisation capital</dd><dt>Minimum Trust Score</dt><dd>65, full score</dd><dt>Invoices</dt><dd>Verified by the council, with independently confirmed delivery</dd><dt>Sectors</dt><dd>Construction and housing</dd></dl>
+  </section>
+  <section class="panel stack" id="lender-pack"><h3>2. Funding requests</h3>${app}</section>
+  ${fullView()}
+  <section class="panel stack" id="lender-monitor"><h3>3. Monitoring</h3>
+    <p class="note">While funding is outstanding, you are alerted when the record changes. Alerts are facts; you decide what to do.</p>
+    ${S.fin.consent ? (alerts.length ? alerts.map(a => `<p class="pill ${a[1]}">${a[0]}</p>`).join("") : `<p class="pill p-release">No alerts</p>`) : `<p class="note">Nothing to monitor until a supplier shares its record.</p>`}
+  </section>
+  <p class="note">Standara earns a fee for each data pack or licence, whether or not the lender lends, so it has no stake in the decision.</p>`;
+}
+
+function vBureau() {
+  const p = scoreParts(), sel = S.bureauSel;
+  const opts = [["build","Demo Build Co.","Full record"],["fac","Demo Facilities Co.","New supplier"],["clean","Demo Cleaning Co.","Public record only"]];
+  let rep;
+  if (sel === "build") rep = `<div class="scorecard"><div class="sc-dial">${scoreDial(p.total, p, false)}</div><div class="stack" style="min-width:0">
+      <div><p class="eyebrow">Report CPB-04417 · full record</p><h3>Demo Build Co. · ${bandOf(p.total)[2]}</h3></div>
+      <dl class="kv"><dt>Public contracts</dt><dd>4 (3 live, 1 closed and delivered)</dd><dt>Closed commitments</dt><dd>14, all delivered</dd>
+        <dt>Evidence on live contract</dt><dd>${p.a3} of ${S.commitments.length} promises independently confirmed</dd><dt>Paid by councils</dt><dd>14 of 14 invoices without dispute</dd>
+        <dt>Pays subcontractors</dt><dd>Within 30 days, confirmed by them</dd><dt>Recommended contract value</dt><dd>£5m to £20m</dd></dl>
+      <div><a class="btn primary" href="#score" style="text-decoration:none;display:inline-block">Open full Trust Score report</a></div></div></div>`;
+  if (sel === "fac") rep = `<div class="scorecard"><div class="sc-dial">${scoreDial(75, {delivery:0, fin:72, acc:78}, true)}</div><div class="stack" style="min-width:0">
+      <div><p class="eyebrow">Report CPB-07120 · provisional</p><h3>Demo Facilities Co. · Provisional</h3></div>
+      <dl class="kv"><dt>Public contracts</dt><dd>None delivered yet on Standara</dd><dt>Score from</dt><dd>Financial standing and accreditation only, capped at 75</dd><dt>Recommended contract value</dt><dd>Start smaller: under £100,000</dd></dl>
+      <p class="note">A new supplier is never marked down for being new. It gets a fair route to a first contract, and its record builds from there.</p></div></div>`;
+  if (sel === "clean") rep = `<div class="stack">
+      <div class="spread"><div><p class="eyebrow">Report CPB-11893 · public record</p><h3>Demo Cleaning Co.</h3></div><span class="pill p-muted">Insufficient verified evidence</span></div>
+      <p class="note">This supplier has not joined Standara. The bureau holds only what is already public, clearly labelled, and gives no score: published facts are not proof of delivery.</p>
+      <dl class="kv"><dt>Companies House</dt><dd>Active · accounts filed on time <span class="pill p-muted">public record</span></dd>
+        <dt>Contract awards</dt><dd>3 awards published by public buyers since 2023 <span class="pill p-muted">public record</span></dd>
+        <dt>Delivery evidence</dt><dd>None held</dd><dt>Trust Score</dt><dd>Not given</dd></dl>
+      <p class="note">The supplier can claim its record free, correct anything wrong, and start building verified evidence.</p></div>`;
+  return `
+  <section class="stack"><p class="eyebrow">Standara</p><h2>Contract Performance Bureau</h2>
+    <p class="lede">A credit bureau records how people repay. The Contract Performance Bureau records how suppliers deliver public contracts: what they promised, what independent evidence shows, and how they pay and get paid. Councils check it before they award; lenders check it before they lend.</p></section>
+  <section class="grid2">
+    ${[["Every supplier","A record for every organisation in UK public procurement; suppliers that have not joined hold public facts only, labelled as such."],
+       ["Evidence, not opinion","Scores come only from verified delivery, checked financial standing and accreditation. Public data alone never gives a score."],
+       ["Free to check and to correct","Buyers get free basic checks each month. Suppliers see their own record free and can dispute anything."]].map(x => `<div class="panel stack"><b>${x[0]}</b><p class="note">${x[1]}</p></div>`).join("")}
+  </section>
+  <section class="panel stack">
+    <h3>Look up a supplier</h3>
+    <div class="row" role="group" aria-label="Choose a supplier">${opts.map(o => `<button class="btn ${sel === o[0] ? "primary" : ""}" data-act="bsel" data-id="${o[0]}">${o[1]} <span class="meta" style="color:inherit;opacity:.8">· ${o[2]}</span></button>`).join("")}</div>
+    ${rep}
+  </section>
+  <p class="note">Every supplier and report here is fictional. Reports never rank suppliers against each other.</p>`;
+}
+
+const WHY = [
+  ["Suppliers", "Free for suppliers", [
+    ["Get paid on time", "Each held invoice says exactly what is missing, so it is fixed fast instead of chased.", "95% of verified invoices paid within 30 days"],
+    ["Prove what you delivered", "Independently confirmed evidence wins the next contract.", "60% of milestones at Assurance 3"],
+    ["Fill in compliance once", "One verified record shared with every buyer. No repeated questionnaires.", "Admin time cut by half"],
+    ["Build a Trust Score from real delivery", "New and small suppliers compete on proof, not size or company age.", "Full score within 3 closed commitments"],
+    ["Cheaper funding", "Lenders fund invoices the council has already verified.", "Finance offered on every verified invoice"]]],
+  ["Councils and public buyers", "Pay per proof check", [
+    ["No payment without proof", "Every invoice is Release, Hold or Review against verified delivery.", "Zero invoices paid without verified delivery"],
+    ["Stop bank-detail fraud", "Name check, call-back, two approvals and cooling-off before any change.", "Zero bank-detail fraud losses"],
+    ["Meet the Procurement Act", "KPI and performance notices drafted from the evidence.", "Notice ready in under an hour"],
+    ["Pay on time", "One exception queue with an alert at day 25.", "95% of valid invoices paid within 30 days"],
+    ["Audit-ready", "A full time-stamped trail for every contract.", "Audit pack in minutes"],
+    ["Less risk of supplier failure", "Watchlist and financial-standing alerts during the contract.", "Distress flagged within 24 hours"]]],
+  ["Lenders", "Pay per data pack or licence", [
+    ["Facts no credit file holds", "Whether work was delivered, who confirmed it, and whether the council cleared the invoice.", "—"],
+    ["Lower risk on each advance", "Only invoices the council has verified are funded.", "Fewer disputes on funded invoices (measured in Phase 3)"],
+    ["Faster decisions", "A full view, with consent, in one data pack.", "Decisions in hours, not days"],
+    ["Live monitoring", "Alerts while funding is outstanding.", "Changes flagged the same day"],
+    ["A neutral source", "Standara is paid whether or not the lender lends.", "—"]]],
+  ["Private buyers and primes", "Primes now; wider private market later", [
+    ["Choose subcontractors on proof", "Verified delivery record and Trust Score instead of questionnaires.", "Every tier 1 subcontractor checked"],
+    ["Pay only for delivered work", "Release, Hold or Review on every subcontractor invoice.", "Zero unverified subcontractor payments"],
+    ["Stop bank-detail fraud", "The same bank-change controls councils get.", "Zero bank-detail fraud losses"],
+    ["Show fair payment", "Subcontractors confirm when they were paid.", "Payment record ready for every public bid"],
+    ["Spot supply-chain failure early", "Alerts on distress, expiry and exclusion.", "Distress flagged within 24 hours"],
+    ["Keep the building record", "Who installed what, with evidence, for Building Safety Act duties.", "Evidence for every element in scope"]]]
+];
+function vWhy() {
+  return `
+  <section class="stack"><p class="eyebrow">Benefits</p><h2>Why each group uses Standara</h2>
+    <p class="lede">Each benefit comes with a target the pilot must prove. These are targets, not results yet.</p></section>
+  <div class="row" role="group" aria-label="Choose a group">${WHY.map((g, i) => `<button class="btn ${S.whySel === i ? "primary" : ""}" data-act="whysel" data-id="${i}">${g[0]}</button>`).join("")}</div>
+  ${WHY.filter((g, i) => S.whySel === i).map(g => `<section class="panel stack">
+    <div class="spread"><h3>${g[0]}</h3><span class="pill p-muted">${g[1]}</span></div>
+    <div class="scroll"><table><thead><tr><th>Reason</th><th>Benefit</th><th>Pilot target</th></tr></thead><tbody>
+      ${g[2].map(r => `<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2] === "—" ? `<span class="meta">—</span>` : `<span class="pill p-info">${r[2]}</span>`}</td></tr>`).join("")}
+    </tbody></table></div></section>`).join("")}
+  <section class="panel stack"><h3>The problem today</h3>
+    <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+      <li>Late payment costs the UK economy almost £11 billion a year, and about 14,000 businesses close each year because of it. <a href="https://www.smallbusinesscommissioner.gov.uk/?p=64916" target="_blank" rel="noopener">Small Business Commissioner, July 2025</a></li>
+      <li>Fraud and error cost the taxpayer £55 billion to £81 billion in 2023–24, mostly undetected. <a href="https://www.nao.org.uk/overviews/the-impact-of-fraud-and-error-on-public-funds-2023-24" target="_blank" rel="noopener">National Audit Office</a></li>
+      <li>Invoice and mandate fraud caused £41.3 million of reported losses in 2025; 68% (£28 million) was on business accounts. <a href="https://www.ukfinance.org.uk/system/files/2026-06/UK%20Finance%20Fraud%20Report%202026.pdf" target="_blank" rel="noopener">UK Finance Annual Fraud Report 2026</a></li>
+    </ul>
+    <p class="note">Private buyers: primes on public contracts can use Standara now for their subcontractors. The wider private market comes later.</p>
+  </section>`;
+}
+const VIEWS = {why: vWhy, bureau: vBureau, lender: vLender, infra: vInfra, how: vHow, contract: vContract, evidence: vEvidence, comply: vComply, pay: vPay, bank: vBank, score: vScore, finance: vFinance, record: vRecord, phases: vPhases};
+function current() { const h = location.hash.slice(1); return VIEWS[h] ? h : "how"; }
+
+/* ---------- Guided user journeys ---------- */
+const JOURNEYS = {
+  supplier: {name:"Supplier journey · Demo Build Co.", steps:[
+    {role:"supplier", view:"record", title:"Join free and get verified", text:"Demo Build Co. signs up at no cost. Its company details, insurance and certificates are checked once, and the verified record is shared with every council it works for."},
+    {role:"supplier", view:"contract", title:"See exactly what you promised", text:"Every promise from the tender and the contract is listed with its due date and owner, so there is no argument later about what was agreed."},
+    {role:"supplier", view:"comply", title:"Add your evidence", text:"Attach the gas safety certificates. The evidence moves from Assurance 1 (your word only) to Assurance 2 (backed by documents).", acts:[["ev-doc","C4"]]},
+    {role:"supplier", view:"comply", title:"Ask for independent confirmation", text:"Request confirmation of the void works. Standara checks the confirmer is independent of you before it counts.", acts:[["corrreq","C2"]]},
+    {role:"supplier", view:"pay", title:"See why an invoice is held", text:"No chasing by phone. Each held invoice says exactly what is missing and when the council must pay or dispute it."},
+    {role:"supplier", view:"comply", title:"Stay compliant", text:"Upload the renewed Cyber Essentials certificate. Standara checks it with the issuer and the council sees it straight away.", acts:[["renew","K3"]]},
+    {role:"supplier", view:"score", title:"Your Trust Score: delivery evidence and financial standing", text:"Half the score comes from delivery evidence the council has confirmed, a quarter from checked financial standing, and a quarter from accreditation. Every confirmed delivery moves it up, and you can see every item behind it, free."},
+    {role:"supplier", view:"score", focus:"#funding-access", title:"Your score helps you reach lenders", text:"Lenders trust the score because it is built from verified facts. A higher score means more funding on better terms. Demo Build Co.’s row is highlighted."},
+    {role:"supplier", view:"finance", focus:"#fund-types", title:"See the types of funding available", text:"Invoice finance, early payment, mobilisation capital and bonds. Each shows whether you can use it now and how your score helps."},
+    {role:"supplier", view:"finance", title:"Give lenders full view and get offers", text:"When you ask for funding, give the lenders you choose a full view of your record, so they can lend. Then ask for offers on a verified invoice. Lenders compete on the same facts, and you can withdraw consent at any time.", acts:[["consent"],["fund","INV-1041"]]},
+    {role:"supplier", view:"finance", title:"Accept an offer and get paid", text:"Pick the offer that suits you. The lender pays you directly and is repaid when the council pays. Standara never lends.", acts:[["accept","INV-1041"]]}
+  ]},
+  lender: {name:"Lender journey · Demo Lender One", steps:[
+    {role:"lender", view:"lender", title:"Set your own lending criteria", text:"Demo Lender One joins as a partner lender and sets its own criteria. Standara never decides who gets credit."},
+    {role:"lender", view:"lender", title:"Get full view when a supplier asks for funding", text:"A lender sees nothing until a supplier asks it for funding and gives full view. Then it sees everything: company, contracts, evidence, invoices, compliance, financial standing, bank status and the full trail.", acts:[["consent"]]},
+    {role:"lender", view:"lender", title:"Receive a funding request", text:"Demo Build Co. asks for invoice finance on an invoice the council has already verified.", acts:[["fund","INV-1041"]]},
+    {role:"lender", view:"lender", focus:"#lender-full", title:"See everything about the supplier", text:"Open each section of the full view. Every fact is live from the record, so the lender judges the supplier on what it has actually delivered."},
+    {role:"lender", view:"lender", focus:"#lender-pack", title:"Check the verified data pack", text:"Every criterion is checked against facts: the Trust Score, the council’s verification of the invoice, independent confirmation of delivery, disputes and bank details."},
+    {role:"lender", view:"lender", title:"Make an offer", text:"Choose the advance and fee. Other lenders can offer on the same facts, so suppliers get a fair price.", acts:[["loffer"]]},
+    {role:"lender", view:"lender", title:"Fund the supplier", text:"The supplier accepts. You pay the supplier directly and are repaid when the council pays the invoice.", acts:[["laccept"]]},
+    {role:"lender", view:"lender", focus:"#lender-monitor", title:"Monitor with live alerts", text:"While funding is outstanding, you are told when something changes: a dispute, an expired certificate, a bank-detail change."},
+    {role:"lender", view:"infra", title:"Lend on credit infrastructure", text:"This is the credit layer: lenders check Standara’s verified delivery record before extending credit to public-sector suppliers, as they check a credit bureau today."}
+  ]},
+  buyer: {name:"Buyer journey · Example Borough Council", steps:[
+    {role:"buyer", view:"contract", title:"Load the contract once", text:"The promises from the tender and the contract are loaded at award, each with an owner on both sides and a due date. KPIs sit alongside."},
+    {role:"buyer", view:"evidence", title:"See all the proof in one place", text:"Every photo, log, check-in and certificate, with how it was captured and its assurance level. Filter to see what is still unconfirmed."},
+    {role:"buyer", view:"comply", title:"Confirm or dispute delivery", text:"Ask an independent inspector to confirm the void works, then confirm it. It becomes Assurance 3, and linked invoices update straight away.", acts:[["corrreq","C2"],["confirm","C2"]]},
+    {role:"buyer", view:"pay", title:"Run the payment check", text:"The void works invoice is now cleared. The apprentice invoice shows 3 of 5 days logged, so pay for what was delivered and hold the rest.", acts:[["partpay","INV-1043"]]},
+    {role:"buyer", view:"bank", title:"Stop bank-detail fraud", text:"The supplier asked to change bank details. Nothing changes until the name check, a call-back and two approvals are done.", acts:[["bank"],["bank"]]},
+    {role:"buyer", view:"comply", title:"Chase what is expiring", text:"The Gas Safe registration expires on 20 November. Chase the supplier now instead of finding out after it lapses.", acts:[["chase","K2"]]},
+    {role:"buyer", view:"contract", title:"Prepare the KPI notice", text:"Standara drafts the Procurement Act performance notice from the evidence. The council checks it and publishes it.", acts:[["kpi"]]},
+    {role:"buyer", view:"score", title:"Check suppliers for the next contract", text:"Before the next award, see each bidder’s Trust Score, built from verified delivery, and a recommended contract value. New suppliers are shown apart, never ranked against proven ones."}
+  ]}
+};
+let J = null;
+const sel = a => `[data-act="${a[0]}"]` + (a[1] ? `[data-id="${a[1]}"]` : "");
+function goStep(i) {
+  J.i = Math.max(0, Math.min(i, JOURNEYS[J.k].steps.length - 1));
+  const st = JOURNEYS[J.k].steps[J.i];
+  S.role = st.role; J.scroll = true;
+  if (location.hash !== "#" + st.view) location.hash = st.view; else { window.scrollTo(0, 0); render(); }
+}
+function doStep() {
+  const st = JOURNEYS[J.k].steps[J.i];
+  const first = (st.acts || []).map(a => document.querySelector(sel(a))).find(Boolean);
+  const y = first ? first.getBoundingClientRect().top + window.scrollY - window.innerHeight / 3 : null;
+  (st.acts || []).forEach(a => { const el = document.querySelector(sel(a)); if (el) el.click(); });
+  if (y !== null) window.scrollTo({top: Math.max(0, y)});
+}
+function guideRender() {
+  const g = document.getElementById("guide");
+  document.body.classList.toggle("guiding", !!J);
+  if (!J) { g.hidden = true; return; }
+  const jr = JOURNEYS[J.k], st = jr.steps[J.i], n = jr.steps.length;
+  const target = (st.acts || []).map(a => document.querySelector(sel(a))).find(Boolean);
+  if (target) { target.classList.add("guide-target"); if (J.scroll) target.scrollIntoView({block: "center"}); }
+  else if (J.scroll && st.focus) { const fe = document.querySelector(st.focus); if (fe) fe.scrollIntoView({block: "start"}); }
+  J.scroll = false;
+  g.hidden = false;
+  g.innerHTML = `<div class="wrap gin"><div class="stack" style="gap:4px">
+      <span class="gk">${jr.name} · step ${J.i + 1} of ${n}</span><h3>${st.title}</h3><p>${st.text}</p>
+      <div class="gdots" aria-hidden="true">${jr.steps.map((_, k) => `<i class="${k <= J.i ? "on" : ""}"></i>`).join("")}</div></div>
+    <div class="gbtns">
+      <button class="btn" data-act="gback" ${J.i === 0 ? "disabled" : ""}>Back</button>
+      ${st.acts ? `<button class="btn ${target ? "primary" : ""}" data-act="gdo" ${target ? "" : "disabled"}>${target ? "Do this step" : "Done"}</button>` : ""}
+      ${J.i < n - 1 ? `<button class="btn ${!st.acts || !target ? "primary" : ""}" data-act="gnext">Next</button>` : `<button class="btn primary" data-act="gexit">Finish</button>`}
+      <button class="btn" data-act="gexit">Exit</button>
+    </div></div>`;
+}
+function render() {
+  const v = current();
+  document.getElementById("view").innerHTML = VIEWS[v]();
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  document.querySelectorAll(".roles button").forEach(b => b.setAttribute("aria-pressed", b.dataset.role === S.role));
+  document.getElementById("trail").innerHTML = S.trail.slice().reverse().map(e => `<li class="${e.fresh ? "new" : ""}"><time>${e.t}</time><b>${e.who}</b>: ${e.what} <span class="ref">${e.ref}</span></li>`).join("");
+  S.trail.forEach(e => e.fresh = false);
+  guideRender();
+}
+
+/* ---------- Actions ---------- */
+document.addEventListener("click", e => {
+  const rb = e.target.closest(".roles button");
+  if (rb) { S.role = rb.dataset.role; S.ovrOpen = null; render(); toast("Now viewing as " + rb.textContent.trim()); return; }
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = b.dataset.id, c = id && C(id), inv = id && S.invoices.find(i => i.id === id);
+  switch (b.dataset.act) {
+    case "ev-doc":
+      c.ev = "doc"; c.by = c.id === "C5" ? "October report uploaded" : "Certificates uploaded for all 40 homes";
+      log(PEOPLE.supplier, `Uploaded evidence for ${c.id}. Now Assurance 2.`, "F-C02"); toast("Evidence added: Assurance 2. Waiting for someone independent to confirm."); break;
+    case "confirm":
+      c.ev = "corroborated"; c.by = "Confirmed by " + CONFIRMER[c.id].who;
+      log(CONFIRMER[c.id].who, `Confirmed ${c.id}: ${c.title.toLowerCase()}. Now Assurance 3.`, "CL-09"); toast("Confirmed. Assurance 3. Linked invoices update straight away."); break;
+    case "dispute":
+      c.ev = "disputed"; c.by = "Disputed by Dana Okafor: 6 homes failed the lettable check";
+      log(PEOPLE.partner, `Disputed ${c.id}: 6 of 40 homes not to standard.`, "CL-11"); toast("Disputed. The supplier sees the reason."); break;
+    case "days":
+      c.done = c.days; c.ev = "corroborated"; c.by = "All 5 days confirmed (3 by check-in, 2 by site sign-in sheet)";
+      log(PEOPLE.partner, `Confirmed days 4 and 5 for ${c.id}.`, "WK-09"); toast("All five days confirmed."); break;
+    case "request":
+      log(PEOPLE.buyer, `Asked Demo Build for evidence on ${c.id}, due 13 Nov.`, "PAY-09"); toast("Request sent to the supplier with a due date."); break;
+    case "partpay": {
+      const cc = C(inv.links[0]); inv.partPaid = Math.round(inv.amount * cc.done / cc.days);
+      log(PEOPLE.buyer, `Part-released ${fmt(inv.partPaid)} on ${inv.id} for ${cc.done} logged days; balance held.`, "PAY-09"); toast("Part-release instruction sent to the finance system."); break; }
+    case "reqinv":
+      inv.requested = true; log(PEOPLE.buyer, `Asked for evidence on ${inv.id}.`, "PAY-09"); toast("Evidence requested."); break;
+    case "disputeinv":
+      inv.disputed = true; log(PEOPLE.buyer, `Disputed ${inv.id}; dispute notice sent to the supplier.`, "Procurement Act s68"); toast("Dispute notice recorded."); break;
+    case "ovr": S.ovrOpen = id; break;
+    case "ovrcancel": S.ovrOpen = null; break;
+    case "ovrgo": {
+      const reason = document.getElementById("ovr-reason").value;
+      inv.override = reason + (inv.amount > 25000 ? " (approved by Priya Shah)" : "");
+      S.ovrOpen = null;
+      log(PEOPLE.buyer, `Overrode ${inv.id}: ${reason}.${inv.amount > 25000 ? " Second approval by Priya Shah." : ""}`, "PAY-01");
+      toast("Override recorded with reason."); break; }
+    case "api": S.apiShown = true; log("Council finance system", "Checked payment run PR-2026-11-06.", "AD-02"); break;
+    case "kpi": S.kpiDrafted = true; log(PEOPLE.buyer, "Drafted the contract performance notice for approval.", "CA-06"); break;
+    case "bank":
+      S.bank.step++;
+      log(S.bank.step === 5 ? "Standara" : (S.bank.step === 4 ? PEOPLE.approver : PEOPLE.buyer), ["","Confirmation of Payee: name match.","Call-back to J. Morris completed.","First approval given.","Second approval given.","Cooling-off ended. New account verified."][S.bank.step], "CA-05");
+      break;
+    case "bankreject": S.bank.rejected = true; log(PEOPLE.buyer, "Rejected the bank-detail change.", "CA-05"); break;
+    case "corrreq": S.corr[id] = true; log(S.role === "buyer" ? PEOPLE.buyer : PEOPLE.supplier, `Requested independent confirmation of ${C(id).title.toLowerCase()} from ${CONFIRMER[id].who}. Independence check passed.`, "CL-09"); toast("Request sent. Independence check passed."); break;
+    case "journey": J = {k: id, i: 0}; goStep(0); toast("Journey started. Use the bar at the bottom."); return;
+    case "gnext": goStep(J.i + 1); return;
+    case "gback": goStep(J.i - 1); return;
+    case "gdo": doStep(); return;
+    case "gexit": J = null; render(); return;
+    case "bsel": S.bureauSel = id; break;
+    case "whysel": S.whySel = +id; break;
+    case "evf": S.evFilter = id; break;
+    case "chase": { const k = S.comply.find(k => k.id === id); k.chased = "6 Nov"; log(PEOPLE.buyer, `Chased ${PEOPLE.supplier} for ${k.name}.`, "CA-02"); toast("Reminder sent to the supplier."); break; }
+    case "renew": { const k = S.comply.find(k => k.id === id); k.status = "valid"; k.expires = "Nov 2027"; log(PEOPLE.supplier, `Uploaded renewed ${k.name}; checked with the issuer.`, "CA-02"); toast("Renewal checked and accepted."); break; }
+    case "consent": S.fin.consent = true; log(PEOPLE.supplier, "Gave Demo Lender One and Demo Lender Two full view of its record for a funding request.", "CL-30"); toast("Full view given. You can withdraw it at any time."); break;
+    case "withdraw": S.fin.consent = false; log(PEOPLE.supplier, "Withdrew lenders' full view of its record.", "CL-30"); toast("Consent withdrawn. Lenders can no longer see your record."); break;
+    case "fund": S.fin.req[id] = true; log(PEOPLE.supplier, `Asked partner lenders for offers on ${id}.`, "FIN-06"); break;
+    case "loffer": S.lender.offer = {adv: +document.getElementById("l-adv").value, fee: document.getElementById("l-fee").value};
+      log("Demo Lender One", `Offered ${S.lender.offer.adv}% advance on INV-1041, fee ${S.lender.offer.fee}% for 30 days.`, "FIN-06"); toast("Offer sent to the supplier."); break;
+    case "laccept": S.fin.req["INV-1041"] = "Demo Lender One"; S.lender.funded = true; if (!S.lender.offer) S.lender.offer = {adv: 90, fee: "1.4"};
+      log(PEOPLE.supplier, "Accepted Demo Lender One's offer on INV-1041. Demo Lender One paid the advance directly.", "FIN-06"); toast("Funded by the lender."); break;
+    case "ldecline": S.lender.declined = true; log("Demo Lender One", "Declined the request on INV-1041.", "FIN-C05"); toast("Declined."); break;
+    case "accept": if (b.dataset.lender === "Demo Lender One") S.lender.funded = true; S.fin.req[id] = b.dataset.lender; log(PEOPLE.supplier, `Accepted ${b.dataset.lender}'s offer on ${id}. The lender funds; Standara does not.`, "FIN-06"); toast("Offer accepted. The lender pays you directly."); break;
+    case "sharedok": S.shared = "ok"; log(PEOPLE.buyer, "Shared-account flag closed: invoice finance account, letter on file.", "PAY-02"); break;
+    case "sharedbad": S.shared = "bad"; log(PEOPLE.buyer, "Shared-account flag escalated to counter-fraud.", "PAY-02"); break;
+  }
+  render();
+});
+document.getElementById("reset").addEventListener("click", () => { S = initial(); render(); toast("Demo reset"); });
+window.addEventListener("hashchange", () => { window.scrollTo(0,0); render(); });
+render();
+</script>
+
+</body></html>
